@@ -1,11 +1,16 @@
 # Copyright (c) 2025 VEXXHOST, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-flux_download_directory: "{{ ansible_env.HOME }}/.cache/flux"
-
+# Version of Flux to install
 flux_version: 0.32.0
+
+# Download URL for the Flux archive
 flux_download_url: "https://github.com/fluxcd/flux2/releases/download/v{{ flux_version }}/flux_{{ flux_version }}_linux_{{ download_artifact_goarch }}.tar.gz" # noqa: yaml[line-length]
+
+# Destination for the downloaded Flux archive
 flux_download_dest: "{{ download_artifact_work_directory }}/flux-{{ flux_version }}-linux-{{ download_artifact_goarch }}.tar.gz"
+
+# Destionation for the unarchived Flux binary
 flux_download_unarchive_dest: /usr/local/bin
 
 flux_image_registry: ghcr.io/fluxcd

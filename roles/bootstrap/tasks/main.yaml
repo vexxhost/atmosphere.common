@@ -1,32 +1,13 @@
-  # - role: vexxhost.containers.download_artifact
-  #   download_artifact_work_directory: "{{ ansible_env.HOME }}/.cache/flux"
-  #   download_artifact_url: "{{ flux_download_url }}"
-  #   download_artifact_dest: "{{ flux_download_dest }}"
-  #   download_artifact_owner: root
-  #   download_artifact_mode: "0755"
-  #   download_artifact_unarchive: true
-  #   download_artifact_unarchive_dest: "{{ flux_download_unarchive_dest }}"
-
-- name: Create cache folder for downloads
-  ansible.builtin.file:
-    path: "{{ flux_download_directory }}"
-    state: directory
-
-- name: Download Flux archive
-  ansible.builtin.get_url:
-    url: "{{ flux_download_url }}"
-    dest: "{{ flux_download_dest }}"
-  register: bootstrap_download
-  until: bootstrap_download is succeeded
-  retries: 5
-
-- name: Unarchive Flux binary
+- name: Download & unarchive Flux
+  include_role: vexxhost.containers.download_artifact
   become: true
-  ansible.builtin.unarchive:
-    src: "{{ flux_download_dest }}"
-    dest: "{{ flux_download_unarchive_dest }}"
-    remote_src: true
-    mode: "0755"
+  vars:
+    download_artifact_url: "{{ flux_download_url }}"
+    download_artifact_dest: "{{ flux_download_dest }}"
+    download_artifact_owner: root
+    download_artifact_mode: "0755"
+    download_artifact_unarchive: true
+    download_artifact_unarchive_dest: "{{ flux_download_unarchive_dest }}"
 
 - name: Install Flux to cluster
   run_once: true

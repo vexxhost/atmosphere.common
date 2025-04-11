@@ -9,12 +9,18 @@ on:
 permissions: {}
 
 jobs:
+  ansible-lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ansible/ansible-lint@v25.2.1
+
   bootstrap:
     runs-on: depot-ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: helm/kind-action@v1
-      - run: ansible-galaxy collection install .
+      - run: ansible-galaxy collection install ${{ github.workspace }}
       - run: |
           ansible-playbook \
             --connection=local \
