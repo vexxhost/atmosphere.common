@@ -10,11 +10,19 @@ ansible-galaxy collection install vexxhost.flux
 Alternatively, you can add it to your `requirements.yaml` file if you are managing
 multiple collections:
 
+<!--
+x-release-please-start-version
+-->
+
 ```yaml
 dependencies:
   - name: vexxhost.flux
     version: 0.1.0
 ```
+
+<!--
+x-release-please-end
+-->
 
 You can then install it using:
 
