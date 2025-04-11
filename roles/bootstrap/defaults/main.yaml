@@ -4,7 +4,7 @@
 flux_version: 0.32.0
 flux_download_url: "https://github.com/fluxcd/flux2/releases/download/v{{ flux_version }}/flux_{{ flux_version }}_linux_{{ download_artifact_goarch }}.tar.gz" # noqa: yaml[line-length]
 flux_download_dest: "{{ download_artifact_work_directory }}/flux-{{ flux_version }}-linux-{{ download_artifact_goarch }}.tar.gz"
-flux_download_unarchive_dest: /usr/bin
+flux_download_unarchive_dest: /usr/local/bin
 flux_binary_checksum: "{{ flux_checksums[download_artifact_goarch][flux_version] }}"
 
 flux_image_registry: ghcr.io/fluxcd
