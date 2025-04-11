@@ -1,0 +1,33 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+download_artifact_work_directory: /var/lib/downloads
+
+# download_artifact_url:
+# download_artifact_dest:
+# download_artifact_owner:
+# download_artifact_mode:
+# download_artifact_checksum:
+download_artifact_validate_certs: true
+# download_artifact_force_basic_auth:
+# download_artifact_url_username:
+# download_artifact_url_password:
+
+download_artifact_http_proxy: "{{ http_proxy | default('') }}"
+download_artifact_https_proxy: "{{ https_proxy | default('') }}"
+download_artifact_no_proxy: "{{ no_proxy | default('') }}"
+
+# NOTE(fitbeard): If this is false, debug information will be displayed but may
+#                 contain some private data, so it is recommended to set it to
+#                 true a production environment.
+download_artifact_no_log: true
+
+# Unarchive the downloaded file
+download_artifact_unarchive: false
+# download_artifact_unarchive_become:
+# download_artifact_unarchive_dest:
+# download_artifact_unarchive_include:
+# download_artifact_unarchive_extra_opts:
+
+# Notify handlers upon changes
+download_artifact_notify: []
