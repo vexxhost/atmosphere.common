@@ -1,0 +1,17 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions: {}
+
+jobs:
+  bootstrap:
+    runs-on: depot-ubuntu-24.04
+    steps:
+      - uses: helm/kind-action@v1
+      - run: ansible-galaxy collection install .
+      - run: ansible-playbook -i localhost, -e target=localhost vexxhost.flux.site
