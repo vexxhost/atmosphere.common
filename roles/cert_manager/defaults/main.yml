@@ -1,0 +1,19 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+cert_manager_helm_repository_name: jetstack
+cert_manager_helm_repository_url: https://charts.jetstack.io
+cert_manager_helm_chart_name: cert-manager
+cert_manager_helm_chart_version: 1.12.10
+
+cert_manager_helm_release_namespace: cert-manager
+cert_manager_helm_release_name: cert-manager
+
+cert_manager_helm_values: {}
+cert_manager_node_selector: {}
+
+cert_manager_image_cli: quay.io/jetstack/cert-manager-ctl:v{{ cert_manager_helm_chart_version }}
+cert_manager_image_controller: quay.io/jetstack/cert-manager-controller:v{{ cert_manager_helm_chart_version }}
+cert_manager_image_cainjector: quay.io/jetstack/cert-manager-cainjector:v{{ cert_manager_helm_chart_version }}
+cert_manager_image_webhook: quay.io/jetstack/cert-manager-webhook:v{{ cert_manager_helm_chart_version }}
+cert_manager_image_acmesolver: quay.io/jetstack/cert-manager-acmesolver:v{{ cert_manager_helm_chart_version }}

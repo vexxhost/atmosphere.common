@@ -16,7 +16,11 @@
           devShell = pkgs.mkShell
             {
               buildInputs = with pkgs; [
+                fluxcd
+                kind
+                kubectl
                 pre-commit
+                uv
               ];
             };
         }
