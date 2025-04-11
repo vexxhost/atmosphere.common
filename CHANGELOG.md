@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/vexxhost/ansible-collection-flux/compare/v0.1.1...v0.1.2) (2025-04-11)
+
+
+### Bug Fixes
+
+* switch to .yml ([a1508f3](https://github.com/vexxhost/ansible-collection-flux/commit/a1508f3d84e9015f12f2db0b0d5de7c27e12e62e))
+
 ## [0.1.1](https://github.com/vexxhost/ansible-collection-flux/compare/v0.1.0...v0.1.1) (2025-04-11)
 
 
