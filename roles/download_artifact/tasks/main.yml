@@ -9,6 +9,7 @@
   ansible.builtin.file:
     path: "{{ download_artifact_work_directory }}"
     state: directory
+    mode: "0755"
 
 - name: Download item
   ansible.builtin.get_url:
