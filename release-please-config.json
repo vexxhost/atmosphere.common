@@ -10,7 +10,7 @@
         },
         {
           "type": "yaml",
-          "path": "galaxy.yaml",
+          "path": "galaxy.yml",
           "jsonpath": "$.version"
         }
       ]
