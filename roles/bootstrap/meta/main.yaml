@@ -20,6 +20,7 @@ galaxy_info:
 
 dependencies:
   - role: vexxhost.containers.download_artifact
+    download_artifact_work_directory: "{{ ansible_env.HOME }}/.cache/flux"
     download_artifact_url: "{{ flux_download_url }}"
     download_artifact_dest: "{{ flux_download_dest }}"
     download_artifact_owner: root
