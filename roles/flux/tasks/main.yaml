@@ -1,0 +1,17 @@
+- name: Download & unarchive Flux
+  ansible.builtin.include_role:
+    name: vexxhost.containers.download_artifact
+    apply:
+      become: true
+  vars:
+    download_artifact_url: "{{ flux_download_url }}"
+    download_artifact_dest: "{{ flux_download_dest }}"
+    download_artifact_owner: root
+    download_artifact_mode: "0755"
+    download_artifact_unarchive: true
+    download_artifact_unarchive_dest: "{{ flux_download_unarchive_dest }}"
+
+- name: Install Flux to cluster
+  run_once: true
+  changed_when: false
+  ansible.builtin.command: flux install --registry={{ flux_image_registry }}

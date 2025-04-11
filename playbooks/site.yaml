@@ -1,0 +1,9 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Bootstrap Flux CD
+  hosts: "{{ target | default('all') }}"
+  roles:
+    - role: vexxhost.flux.flux
+      tags:
+        - flux
