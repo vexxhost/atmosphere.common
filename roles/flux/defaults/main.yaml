@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Version of Flux to install
-flux_version: 0.32.0
+flux_version: 2.5.1
 
 # Download URL for the Flux archive
 flux_download_url: "https://github.com/fluxcd/flux2/releases/download/v{{ flux_version }}/flux_{{ flux_version }}_linux_{{ download_artifact_goarch }}.tar.gz" # noqa: yaml[line-length]
