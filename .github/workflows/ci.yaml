@@ -12,6 +12,7 @@ jobs:
   bootstrap:
     runs-on: depot-ubuntu-24.04
     steps:
+      - uses: actions/checkout@v4
       - uses: helm/kind-action@v1
       - run: ansible-galaxy collection install .
       - run: ansible-playbook -i localhost, -e target=localhost vexxhost.flux.site
