@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 - name: Bootstrap Flux CD
-  hosts: "{{ target }}"
+  hosts: "{{ target | default('all') }}"
   roles:
     - role: vexxhost.flux.flux
       tags:

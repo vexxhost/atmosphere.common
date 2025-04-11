@@ -26,3 +26,10 @@ jobs:
             --connection=local \
             --extra-vars target=localhost \
             vexxhost.flux.site
+
+  pr-title:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ytanikin/pr-conventional-commits@1.4.1
+        with:
+          task_types: '["build", "chore", "ci", "docs", "feat", "fix", "perf", "refactor", "revert", "style", "test"]'
