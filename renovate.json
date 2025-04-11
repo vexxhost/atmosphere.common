@@ -4,5 +4,14 @@
     "config:recommended",
     "group:allDigest",
     "helpers:pinGitHubActionDigestsToSemver"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["roles/flux/defaults/main.yaml"],
+      "matchStrings": ["flux_version: (?<currentValue>\\S+)"],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "fluxcd/flux2"
+    }
   ]
 }
