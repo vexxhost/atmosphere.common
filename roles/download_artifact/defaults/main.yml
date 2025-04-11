@@ -1,7 +1,7 @@
 # Copyright (c) 2025 VEXXHOST, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-download_artifact_work_directory: "{{ ansible_env.HOME }}/.cache/download_artifact"
+download_artifact_work_directory: /var/lib/downloads
 
 # download_artifact_url:
 # download_artifact_dest:
