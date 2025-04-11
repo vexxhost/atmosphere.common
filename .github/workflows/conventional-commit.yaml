@@ -12,7 +12,7 @@ jobs:
   pr-title:
     runs-on: ubuntu-latest
     permissions:
-       pull-requests: write
+      pull-requests: write
     steps:
       - uses: ytanikin/pr-conventional-commits@1.4.1
         with:
