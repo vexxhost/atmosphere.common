@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: ansible/ansible-lint@c16f018b1bdfdea6717f4b5b1b141a78b86021cd # v25.2.1
 
-  bootstrap:
+  flux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -25,4 +25,4 @@ jobs:
           ansible-playbook \
             --connection=local \
             --extra-vars target=localhost \
-            vexxhost.flux.site
+            atmosphere.common.flux
