@@ -4,6 +4,6 @@
 - name: Bootstrap Flux CD
   hosts: "{{ target | default('all') }}"
   roles:
-    - role: vexxhost.flux.flux
+    - role: atmosphere.common.flux
       tags:
         - flux
