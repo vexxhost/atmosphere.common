@@ -17,7 +17,7 @@ x-release-please-start-version
 ```yaml
 dependencies:
   - name: vexxhost.flux
-    version: 0.1.0
+    version: 0.1.1
 ```
 
 <!--

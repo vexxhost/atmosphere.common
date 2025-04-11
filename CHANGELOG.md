@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/vexxhost/ansible-collection-flux/compare/v0.1.0...v0.1.1) (2025-04-11)
+
+
+### Miscellaneous Chores
+
+* release 0.1.1 ([2db7a39](https://github.com/vexxhost/ansible-collection-flux/commit/2db7a39763b6bcf7194d1a5d9ee1580aa3cbb905))
+
 ## 0.1.0 (2025-04-11)
 
 
