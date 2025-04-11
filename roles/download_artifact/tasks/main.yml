@@ -5,6 +5,11 @@
   ansible.builtin.debug:
     msg: "{{ download_artifact_url }}"
 
+- name: Ensure download directory exists
+  ansible.builtin.file:
+    path: "{{ download_artifact_work_directory }}"
+    state: directory
+
 - name: Download item
   ansible.builtin.get_url:
     url: "{{ download_artifact_url }}"
