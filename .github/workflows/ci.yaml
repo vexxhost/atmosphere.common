@@ -15,4 +15,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: helm/kind-action@v1
       - run: ansible-galaxy collection install .
-      - run: ansible-playbook -i localhost, -e target=localhost vexxhost.flux.site
+      - run: |
+          ansible-playbook \
+            --connection=local \
+            --extra-vars target=localhost \
+            vexxhost.flux.site
