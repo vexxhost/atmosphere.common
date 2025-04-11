@@ -3,7 +3,6 @@
 
 - name: Bootstrap Flux CD
   hosts: "{{ target }}"
-  become: true
   roles:
     - role: vexxhost.flux.bootstrap
       tags:
