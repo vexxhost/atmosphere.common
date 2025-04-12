@@ -1,0 +1,46 @@
+- name: Wait for "cert-manager" CRDs
+  run_once: true
+  kubernetes.core.k8s_info:
+    kind: CustomResourceDefinition
+    name: certificates.cert-manager.io
+  register: ironic_standalone_operator_cert_manager_crd
+  until: ironic_standalone_operator_cert_manager_crd.resources | length > 0
+  failed_when: ironic_standalone_operator_cert_manager_crd.resources | length == 0
+  retries: 60
+  delay: 1
+
+- name: Install Ironic Standalone Operator
+  run_once: true
+  kubernetes.core.k8s:
+    server_side_apply:
+      field_manager: "atmosphere.common"
+      force_conflicts: true
+    definition:
+      - apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: "{{ ironic_standalone_operator_namespace }}"
+
+      - apiVersion: source.toolkit.fluxcd.io/v1
+        kind: GitRepository
+        metadata:
+          name: ironic-standalone-operator
+          namespace: "{{ ironic_standalone_operator_namespace }}"
+        spec:
+          interval: 60m
+          url: "{{ ironic_standalone_operator_git_url }}"
+          ref: "{{ ironic_standalone_operator_git_ref }}"
+
+      - apiVersion: kustomize.toolkit.fluxcd.io/v1
+        kind: Kustomization
+        metadata:
+          name: ironic-standalone-operator
+          namespace: "{{ ironic_standalone_operator_namespace }}"
+        spec:
+          targetNamespace: "{{ ironic_standalone_operator_namespace }}"
+          sourceRef:
+            kind: GitRepository
+            name: ironic-standalone-operator
+          path: config/default
+          prune: true
+          interval: 10m

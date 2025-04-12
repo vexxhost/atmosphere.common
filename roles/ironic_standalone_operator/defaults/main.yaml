@@ -1,0 +1,15 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+# Version of Ironic Standalone Operator to install
+ironic_standalone_operator_version: 0.2.0
+
+# Git repository location for Ironic Standalone Operator
+ironic_standalone_operator_git_url: https://github.com/metal3-io/ironic-standalone-operator
+
+# Git reference for Ironic Standalone Operator
+ironic_standalone_operator_git_ref:
+  tag: "v{{ ironic_standalone_operator_version }}"
+
+# Namespace to install Ironic Standalone Operator
+ironic_standalone_operator_namespace: "ironic-standalone-operator-system"
