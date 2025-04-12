@@ -7,6 +7,8 @@ authors:
 description: Set of common roles for deploying Kubernetes components
 license:
   - Apache-2.0
+dependencies:
+  kubernetes.core: ">=2.4.0"
 tags:
   - application
   - cloud
@@ -16,5 +18,3 @@ repository: https://github.com/vexxhost/atmosphere.common
 documentation: https://github.com/vexxhost/atmosphere.common/tree/main/docs
 homepage: https://github.com/vexxhost/atmosphere.common
 issues: https://github.com/vexxhost/atmosphere.common/issues
-build_ignore:
-  - .github
