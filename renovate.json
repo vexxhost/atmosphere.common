@@ -8,6 +8,14 @@
   "customManagers": [
     {
       "customType": "regex",
+      "fileMatch": ["roles/cert_manager/defaults/main.yaml"],
+      "matchStrings": ["cert_manager_helm_chart_version: (?<currentValue>\\S+)"],
+      "datasourceTemplate": "helm",
+      "depNameTemplate": "cert-manager",
+      "registryUrlTemplate": "https://charts.jetstack.io"
+    },
+    {
+      "customType": "regex",
       "fileMatch": ["roles/flux/defaults/main.yaml"],
       "matchStrings": ["flux_version: (?<currentValue>\\S+)"],
       "datasourceTemplate": "github-releases",
