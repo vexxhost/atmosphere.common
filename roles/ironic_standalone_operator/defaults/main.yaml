@@ -12,4 +12,4 @@ ironic_standalone_operator_git_ref:
   tag: "v{{ ironic_standalone_operator_version }}"
 
 # Namespace to install Ironic Standalone Operator
-ironic_standalone_operator_namespace: "ironic-standalone-operator-system"
+ironic_standalone_operator_namespace: ironic-standalone-operator-system
