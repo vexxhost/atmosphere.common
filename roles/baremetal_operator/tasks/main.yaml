@@ -5,7 +5,12 @@
     kind: Ironic
     namespace: "{{ baremetal_operator_namespace }}"
   register: baremetal_operator_ironic
+  retries: 60
+  delay: 1
   failed_when: baremetal_operator_ironic.resources | length == 0
+  until:
+    - baremetal_operator_ironic.resources | length > 0
+    - baremetal_operator_ironic.resources[0].spec.apiCredentialsName is defined
 
 - name: Store custom resource in fact
   run_once: true
