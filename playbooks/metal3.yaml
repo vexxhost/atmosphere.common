@@ -12,3 +12,7 @@
     - role: atmosphere.common.ironic_standalone
       tags:
         - ironic-standalone
+
+    - role: atmosphere.common.baremetal_operator
+      tags:
+        - baremetal-operator

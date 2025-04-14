@@ -1,0 +1,76 @@
+- name: Get Ironic custom resource
+  run_once: true
+  kubernetes.core.k8s_info:
+    api_version: ironic.metal3.io/v1alpha1
+    kind: Ironic
+    namespace: "{{ baremetal_operator_namespace }}"
+  register: baremetal_operator_ironic
+  failed_when: baremetal_operator_ironic.resources | length == 0
+
+- name: Store custom resource in fact
+  run_once: true
+  set_fact:
+    baremetal_operator_ironic: "{{ baremetal_operator_ironic.resources[0] }}"
+
+- name: Install Baremetal Operator
+  run_once: true
+  kubernetes.core.k8s:
+    server_side_apply:
+      field_manager: atmosphere.common
+      force_conflicts: true
+    definition:
+      - apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: "{{ baremetal_operator_namespace }}"
+
+      - apiVersion: source.toolkit.fluxcd.io/v1
+        kind: GitRepository
+        metadata:
+          name: baremetal-operator
+          namespace: "{{ baremetal_operator_namespace }}"
+        spec:
+          interval: 60m
+          url: "{{ baremetal_operator_git_url }}"
+          ref: "{{ baremetal_operator_git_ref }}"
+
+      - apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: ironic
+          namespace: "{{ baremetal_operator_namespace }}"
+        data:
+          DEPLOY_KERNEL_URL: http://{{ baremetal_operator_ironic.spec.networking.ipAddress }}:6180/images/ironic-python-agent.kernel
+          DEPLOY_RAMDISK_URL: http://{{ baremetal_operator_ironic.spec.networking.ipAddress }}:6180/images/ironic-python-agent.initramfs
+          IRONIC_ENDPOINT: "http://{{ baremetal_operator_ironic.spec.networking.ipAddress }}:6385/v1/"
+
+      - apiVersion: kustomize.toolkit.fluxcd.io/v1
+        kind: Kustomization
+        metadata:
+          name: baremetal-operator
+          namespace: "{{ baremetal_operator_namespace }}"
+        spec:
+          targetNamespace: "{{ baremetal_operator_namespace }}"
+          sourceRef:
+            kind: GitRepository
+            name: baremetal-operator
+          path: config/base
+          components:
+            - ../components/basic-auth
+          patches:
+            - patch: |-
+                apiVersion: apps/v1
+                kind: Deployment
+                metadata:
+                  name: baremetal-operator-controller-manager
+                spec:
+                  template:
+                    spec:
+                      volumes:
+                      - name: ironic-credentials
+                        secret:
+                          secretName: {{ baremetal_operator_ironic.spec.apiCredentialsName }}
+              target:
+                kind: Deployment
+          prune: true
+          interval: 10m
