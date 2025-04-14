@@ -12,7 +12,7 @@ cert_manager_helm_release_name: cert-manager
 cert_manager_helm_values: {}
 cert_manager_node_selector: {}
 
-cert_manager_image_cli: quay.io/jetstack/cert-manager-ctl:v{{ cert_manager_helm_chart_version }}
+cert_manager_image_cli: quay.io/jetstack/cert-manager-startupapicheck:v{{ cert_manager_helm_chart_version }}
 cert_manager_image_controller: quay.io/jetstack/cert-manager-controller:v{{ cert_manager_helm_chart_version }}
 cert_manager_image_cainjector: quay.io/jetstack/cert-manager-cainjector:v{{ cert_manager_helm_chart_version }}
 cert_manager_image_webhook: quay.io/jetstack/cert-manager-webhook:v{{ cert_manager_helm_chart_version }}
