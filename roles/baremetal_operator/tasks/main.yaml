@@ -9,7 +9,7 @@
 
 - name: Store custom resource in fact
   run_once: true
-  set_fact:
+  ansible.builtin.set_fact:
     baremetal_operator_ironic: "{{ baremetal_operator_ironic.resources[0] }}"
 
 - name: Install Baremetal Operator
