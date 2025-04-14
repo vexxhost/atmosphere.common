@@ -7,7 +7,7 @@
   register: baremetal_operator_ironic
   retries: 60
   delay: 1
-  failed_when: baremetal_operator_ironic.resources | length == 0
+  failed_when: baremetal_operator_ironic.resources | length == 0 or baremetal_operator_ironic.resources[0].spec.apiCredentialsName is not defined
   until:
     - baremetal_operator_ironic.resources | length > 0
     - baremetal_operator_ironic.resources[0].spec.apiCredentialsName is defined
