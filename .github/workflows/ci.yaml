@@ -42,7 +42,7 @@ jobs:
               atmosphere.common.flux \
               atmosphere.common.cert_manager
 
-  ironic-standalone-operator:
+  metal3:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -53,6 +53,10 @@ jobs:
           uv run ansible-playbook \
             --connection=local \
             --extra-vars target=localhost \
+            --extra-vars ironic_standalone_ip_address=172.18.0.2 \
+            --extra-vars ironic_standalone_dhcp_cidr=172.18.0.0/24 \
+            --extra-vars ironic_standalone_dhcp_range_start=172.18.0.10 \
+            --extra-vars ironic_standalone_dhcp_range_end=172.18.0.20 \
               atmosphere.common.flux \
               atmosphere.common.cert_manager \
               atmosphere.common.metal3
