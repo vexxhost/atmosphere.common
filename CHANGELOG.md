@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.2.0](https://github.com/vexxhost/atmosphere.common/compare/v0.1.3...v0.2.0) (2025-04-14)
+
+
+### Features
+
+* Add "download_artifact" ([#17](https://github.com/vexxhost/atmosphere.common/issues/17)) ([cd7f466](https://github.com/vexxhost/atmosphere.common/commit/cd7f466a772c31c51ae6ce251adf3b0a1bf99c18))
+* add baremetal operator ([#24](https://github.com/vexxhost/atmosphere.common/issues/24)) ([2045964](https://github.com/vexxhost/atmosphere.common/commit/2045964914b154871d6a2a8bf295401a11567ba6))
+* add ironic standalone ([#23](https://github.com/vexxhost/atmosphere.common/issues/23)) ([1dc25ee](https://github.com/vexxhost/atmosphere.common/commit/1dc25ee22f0c570b4cea35c0ab90e58e965fcd8b))
+* add ironic standalone operator ([#18](https://github.com/vexxhost/atmosphere.common/issues/18)) ([75efaee](https://github.com/vexxhost/atmosphere.common/commit/75efaee6867596dfc906ec7f6e2d1d15116fe115))
+* rename to atmosphere.common ([#15](https://github.com/vexxhost/atmosphere.common/issues/15)) ([41434dd](https://github.com/vexxhost/atmosphere.common/commit/41434ddde3ff074dcd69de2c7518012e3ec324d6))
+
+
+### Documentation
+
+* updated README for usage instructions ([1e6731b](https://github.com/vexxhost/atmosphere.common/commit/1e6731b3e81891ddd14408df099428c6508deadc))
+
 ## [0.1.3](https://github.com/vexxhost/atmosphere.common/compare/v0.1.2...v0.1.3) (2025-04-11)
 
 
