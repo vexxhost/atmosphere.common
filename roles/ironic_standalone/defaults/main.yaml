@@ -1,0 +1,21 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+# Namespace to install Ironic Standalone
+ironic_standalone_namespace: baremetal-operator-system
+
+# Name of the Ironic Standalone instance
+ironic_standalone_name: ironic
+
+# Interface for Ironic Standalone
+ironic_standalone_interface: "{{ ansible_default_ipv4.interface }}"
+
+# IP address for Ironic Standalone
+# ironic_standalone_ip_address: "{{ kube_vip_address }}"
+
+# Network CIDR for DHCP
+# ironic_standalone_dhcp_cidr:
+
+# Usable range start and end for DHCP
+# ironic_standalone_dhcp_range_start:
+# ironic_standalone_dhcp_range_end:

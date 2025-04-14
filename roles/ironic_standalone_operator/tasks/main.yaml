@@ -13,7 +13,7 @@
   run_once: true
   kubernetes.core.k8s:
     server_side_apply:
-      field_manager: "atmosphere.common"
+      field_manager: atmosphere.common
       force_conflicts: true
     definition:
       - apiVersion: v1
@@ -42,5 +42,8 @@
             kind: GitRepository
             name: ironic-standalone-operator
           path: config/default
+          images:
+            - name: quay.io/metal3-io/ironic-standalone-operator
+              newTag: "v{{ ironic_standalone_operator_version }}"
           prune: true
           interval: 10m
