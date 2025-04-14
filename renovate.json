@@ -8,6 +8,13 @@
   "customManagers": [
     {
       "customType": "regex",
+      "fileMatch": ["roles/baremetal_operator/defaults/main.yaml"],
+      "matchStrings": ["baremetal_operator_version: (?<currentValue>\\S+)"],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "metal3-io/baremetal-operator"
+    },
+    {
+      "customType": "regex",
       "fileMatch": ["roles/cert_manager/defaults/main.yaml"],
       "matchStrings": ["cert_manager_helm_chart_version: (?<currentValue>\\S+)"],
       "datasourceTemplate": "helm",
