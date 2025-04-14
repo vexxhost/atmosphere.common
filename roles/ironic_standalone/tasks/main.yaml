@@ -4,6 +4,17 @@
       - network
   when: ansible_default_ipv4 is not defined
 
+- name: Wait for Ironic CRDs
+  run_once: true
+  kubernetes.core.k8s_info:
+    kind: CustomResourceDefinition
+    name: ironics.ironic.metal3.io
+  register: ironic_standalone_operator_crd
+  until: ironic_standalone_operator_crd.resources | length > 0
+  failed_when: ironic_standalone_operator_crd.resources | length == 0
+  retries: 60
+  delay: 1
+
 - name: Install Ironic Standalone
   run_once: true
   kubernetes.core.k8s:
