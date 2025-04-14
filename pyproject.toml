@@ -1,6 +1,6 @@
 [project]
 name = "atmosphere.common"
-version = "0.1.3"
+version = "0.2.0"
 dependencies = [
     "ansible-core>=2.18.4",
     "docker-image-py>=0.1.13",
