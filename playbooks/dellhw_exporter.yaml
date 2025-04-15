@@ -1,0 +1,10 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Deploy "dellhw_exporter"
+  hosts: "{{ target | default('all') }}"
+  gather_facts: false
+  roles:
+    - role: atmosphere.common.dellhw_exporter
+      tags:
+        - dellhw-exporter
