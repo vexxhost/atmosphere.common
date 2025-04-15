@@ -7,4 +7,4 @@
   roles:
     - role: atmosphere.common.dellhw_exporter
       tags:
-        - dellhw_exporter
+        - dellhw-exporter
