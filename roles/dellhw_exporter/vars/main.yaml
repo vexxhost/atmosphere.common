@@ -16,3 +16,4 @@ _dellhw_exporter_helm_values:
   image:
     repository: "{{ dellhw_exporter_image | atmosphere.common.docker_image('name') }}"
     tag: "{{ dellhw_exporter_image | atmosphere.common.docker_image('tag') }}"
+  fullnameOverride: "{{ dellhw_exporter_helm_release_name }}"
