@@ -78,6 +78,6 @@ jobs:
         run: |
           uv run kubectl wait \
             --namespace monitoring \
-            --for=condition=available \
+            --for=condition=ready \
             --timeout=5m \
-            deployment/dellhw-exporter
+            daemonset/dellhw-exporter
