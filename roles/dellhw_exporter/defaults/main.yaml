@@ -6,7 +6,7 @@ dellhw_exporter_helm_repository_url: https://galexrt.github.io/dellhw_exporter
 dellhw_exporter_helm_chart_name: dellhw-exporter
 dellhw_exporter_helm_chart_version: 2.0.0-rc.1
 
-dellhw_exporter_helm_release_namespace: dellhw-exporter
+dellhw_exporter_helm_release_namespace: monitoring
 dellhw_exporter_helm_release_name: dellhw-exporter
 
 dellhw_exporter_helm_values: {}

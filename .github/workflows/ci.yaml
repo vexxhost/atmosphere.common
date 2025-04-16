@@ -74,3 +74,10 @@ jobs:
             --extra-vars target=localhost \
               atmosphere.common.flux \
               atmosphere.common.dellhw_exporter
+      - name: Ensure dellhw_exporter deployment is ready
+        run: |
+          uv run kubectl wait \
+            --namespace monitoring \
+            --for=condition=available \
+            --timeout=5m \
+            deployment/dellhw-exporter
