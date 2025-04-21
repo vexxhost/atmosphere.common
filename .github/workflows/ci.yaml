@@ -139,7 +139,6 @@ jobs:
       - name: Create metrics-values.yml
         run: |
           cat <<EOF > metrics-values.yml
-          metrics_server_helm_release_namespace: kube-system
           metrics_server_helm_values:
             args:
               - --kubelet-insecure-tls
