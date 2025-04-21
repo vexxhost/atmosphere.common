@@ -72,6 +72,7 @@ jobs:
           uv run ansible-playbook \
             --connection=local \
             --extra-vars target=localhost \
+            --extra-vars 'metrics_server_helm_values={"args": ["--kubelet-insecure-tls"]}' \
               atmosphere.common.flux \
               atmosphere.common.metrics_server
       - name: Wait for metrics-server HelmRelease to be ready
