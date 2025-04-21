@@ -74,9 +74,26 @@ jobs:
             --extra-vars target=localhost \
               atmosphere.common.flux \
               atmosphere.common.metrics_server
+      - name: Wait for metrics-server HelmRelease to be ready
+        run: |
+          echo "Waiting for HelmRelease/metrics-server to be ready..."
+          for i in {1..30}; do
+            status=$(kubectl get helmrelease metrics-server -n kube-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "")
+            if [ "$status" == "True" ]; then
+              echo "HelmRelease is ready."
+              break
+            fi
+            echo "Still waiting... ($i/30)"
+            sleep 10
+          done
+          if [ "$status" != "True" ]; then
+            echo "HelmRelease did not become ready in time."
+            kubectl get helmrelease metrics-server -n kube-system -o yaml
+            exit 1
+          fi
       - name: Wait for Metrics Server to be ready
         run: |
-          kubectl wait --for=condition=available --timeout=90s deployment/metrics-server -n kube-system
+          kubectl rollout status deployment/metrics-server -n kube-system --timeout=90s
       - name: Verify metrics-server with kubectl top
         run: |
           echo "Waiting for metrics-server to generate metrics..."
