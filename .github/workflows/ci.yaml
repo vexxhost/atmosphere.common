@@ -27,6 +27,16 @@ jobs:
             --connection=local \
             --extra-vars target=localhost \
               atmosphere.common.flux
+      - name: Ensure flux deployment is ready
+        run: |
+          uv run kubectl wait \
+            --namespace flux-system \
+            --for=condition=available \
+            --timeout=5m \
+            deployment/helm-controller \
+            deployment/kustomize-controller \
+            deployment/notification-controller \
+            deployment/source-controller
 
   cert-manager:
     runs-on: ubuntu-latest
