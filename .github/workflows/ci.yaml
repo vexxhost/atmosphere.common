@@ -66,7 +66,7 @@ jobs:
             --timeout=5m \
             deployment.apps/cert-manager \
             deployment.apps/cert-manager-cainjector \
-            deployment.apps/cert-manager-webhook 
+            deployment.apps/cert-manager-webhook
 
   metal3:
     runs-on: ubuntu-latest
@@ -86,3 +86,18 @@ jobs:
               atmosphere.common.flux \
               atmosphere.common.cert_manager \
               atmosphere.common.metal3
+      - name: Wait Baremetal Operator deployment to be ready
+        run: |
+          uv run kubectl wait \
+            --namespace baremetal-operator-system \
+            --for=condition=available \
+            --timeout=5m \
+            deployment.apps/baremetal-operator-controller-manager \
+            deployment.apps/ironic-service
+      - name: Wait Ironic Standalone Operator deployment to be ready
+        run: |
+          uv run kubectl wait \
+            --namespace ironic-standalone-operator-system \
+            --for=condition=available \
+            --timeout=5m \
+            deployment.apps/ironic-standalone-operator-controller-manager
