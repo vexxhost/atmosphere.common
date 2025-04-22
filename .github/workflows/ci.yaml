@@ -27,7 +27,7 @@ jobs:
             --connection=local \
             --extra-vars target=localhost \
               atmosphere.common.flux
-      - name: Ensure flux deployment is ready
+      - name: Wait flux deployment to be ready
         run: |
           uv run kubectl wait \
             --namespace flux-system \
@@ -51,6 +51,22 @@ jobs:
             --extra-vars target=localhost \
               atmosphere.common.flux \
               atmosphere.common.cert_manager
+      - name: Wait cert-manager HelmRelease to be ready
+        run: |
+          uv run kubectl wait \
+            --namespace cert-manager \
+            --for=condition=ready \
+            --timeout=5m \
+            helmrelease/cert-manager
+      - name: Wait cert-manager deployment to be ready
+        run: |
+          uv run kubectl wait \
+            --namespace cert-manager \
+            --for=condition=available \
+            --timeout=5m \
+            deployment.apps/cert-manager \
+            deployment.apps/cert-manager-cainjector \
+            deployment.apps/cert-manager-webhook 
 
   metal3:
     runs-on: ubuntu-latest
