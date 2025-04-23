@@ -1,3 +1,5 @@
+exclude: ^(.github/.*|meta/.*|galaxy.yml|.pre-commit-config.yaml)$
+
 default_install_hook_types:
   - pre-commit
   - commit-msg
@@ -9,3 +11,25 @@ repos:
       - id: conventional-pre-commit
         stages: [commit-msg]
         args: []
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  - repo: local
+    hooks:
+      - id: check-spdx-copyright-text
+        name: Check SPDX-FileCopyrightText
+        args: [--negate]
+        entry: '^# Copyright \(c\) 2025 VEXXHOST, Inc\.$'
+        language: pygrep
+        files: \.(py|sh|yaml|yml)$
+      - id: check-spdx-license-identifier
+        name: Check SPDX-License-Identifier
+        args: [--negate]
+        entry: '^# SPDX-License-Identifier: Apache-2\.0$'
+        language: pygrep
+        files: \.(py|sh|yaml|yml)$
