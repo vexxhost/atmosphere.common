@@ -86,6 +86,12 @@ jobs:
               atmosphere.common.flux \
               atmosphere.common.cert_manager \
               atmosphere.common.metal3
+      - name: Debug the Baremetal Operator
+        run: |
+          for i in {1..10}; do
+            kubectl logs -n baremetal-operator-system deployment.apps/baremetal-operator-controller-manager
+            sleep 10
+          done
       - name: Wait Baremetal Operator deployment to be ready
         run: |
           uv run kubectl wait \
