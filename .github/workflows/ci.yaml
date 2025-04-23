@@ -88,11 +88,7 @@ jobs:
               atmosphere.common.metal3
       - name: Debug the Baremetal Operator
         run: |
-          kubectl get all -n baremetal-operator-system
-          for i in {1..10}; do
-            kubectl logs -n baremetal-operator-system deployment.apps/baremetal-operator-controller-manager
-            sleep 10
-          done
+          kubectl get kustomization.kustomize.toolkit.fluxcd.io/baremetal-operator -n baremetal-operator-system -o yaml
       - name: Wait Baremetal Operator deployment to be ready
         run: |
           uv run kubectl wait \
