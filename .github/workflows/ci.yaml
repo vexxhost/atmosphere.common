@@ -86,9 +86,13 @@ jobs:
               atmosphere.common.flux \
               atmosphere.common.cert_manager \
               atmosphere.common.metal3
-      - name: Debug the Baremetal Operator
+      - name: Wait Baremetal Operator kustomizations to be ready
         run: |
-          kubectl get kustomization.kustomize.toolkit.fluxcd.io/baremetal-operator -n baremetal-operator-system -o yaml
+          uv run kubectl wait \
+            --namespace baremetal-operator-system \
+            --for=condition=ready \
+            --timeout=5m \
+            kustomizations/baremetal-operator
       - name: Wait Baremetal Operator deployment to be ready
         run: |
           uv run kubectl wait \
