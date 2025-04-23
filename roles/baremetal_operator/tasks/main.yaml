@@ -5,7 +5,7 @@
     kind: Ironic
     namespace: "{{ baremetal_operator_namespace }}"
   register: baremetal_operator_ironic
-  retries: 60
+  retries: 120
   delay: 1
   failed_when: baremetal_operator_ironic.resources | length == 0 or baremetal_operator_ironic.resources[0].spec.apiCredentialsName is not defined
   until:
