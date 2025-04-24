@@ -96,10 +96,10 @@ jobs:
       - name: Wait Ironic Standalone Operator kustomizations to be ready
         run: |
           kubectl wait \
-            --namespace ironic-standalone-operator \
+            --namespace ironic-standalone-operator-system \
             --for=condition=ready \
             --timeout=5m \
-            kustomizations/ironic-standalone-operator-system
+            kustomizations/ironic-standalone-operator
       - name: Wait Baremetal Operator deployment to be ready
         run: |
           kubectl wait \
