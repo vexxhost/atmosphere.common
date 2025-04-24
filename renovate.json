@@ -5,6 +5,12 @@
     "group:allDigest",
     "helpers:pinGitHubActionDigestsToSemver"
   ],
+  "packageRules": [
+    {
+      "matchPackageNames": ["cert-manager"],
+      "extractVersion": "^v(?<version>.*)$"
+    }
+  ],
   "customManagers": [
     {
       "customType": "regex",
