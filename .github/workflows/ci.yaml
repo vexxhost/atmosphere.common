@@ -96,7 +96,7 @@ jobs:
       - name: Wait Ironic Standalone Operator kustomizations to be ready
         run: |
           kubectl wait \
-            --namespace ironic-standalone-operator-system \
+            --namespace ironic-standalone-operator \
             --for=condition=ready \
             --timeout=5m \
             kustomizations/ironic-standalone-operator-system
