@@ -21,6 +21,15 @@ jobs:
             --connection=local \
             --extra-vars target=localhost \
               atmosphere.common.flux
+      - run: |
+          kubectl wait \
+            --namespace flux-system \
+            --for=condition=available \
+            --timeout=5m \
+            deployment/helm-controller \
+            deployment/kustomize-controller \
+            deployment/notification-controller \
+            deployment/source-controller
 
   cert-manager:
     runs-on: ubuntu-latest
@@ -35,6 +44,20 @@ jobs:
             --extra-vars target=localhost \
               atmosphere.common.flux \
               atmosphere.common.cert_manager
+      - run: |
+          kubectl wait \
+            --namespace cert-manager \
+            --for=condition=ready \
+            --timeout=5m \
+            helmrelease/cert-manager
+      - run: |
+          kubectl wait \
+            --namespace cert-manager \
+            --for=condition=available \
+            --timeout=5m \
+            deployment.apps/cert-manager \
+            deployment.apps/cert-manager-cainjector \
+            deployment.apps/cert-manager-webhook
 
   metal3:
     runs-on: ubuntu-latest
@@ -54,3 +77,28 @@ jobs:
               atmosphere.common.flux \
               atmosphere.common.cert_manager \
               atmosphere.common.metal3
+      - run: |
+          kubectl wait \
+            --namespace baremetal-operator-system \
+            --for=condition=ready \
+            --timeout=5m \
+            kustomizations/baremetal-operator
+      - run: |
+          kubectl wait \
+            --namespace ironic-standalone-operator-system \
+            --for=condition=ready \
+            --timeout=5m \
+            kustomizations/ironic-standalone-operator
+      - run: |
+          kubectl wait \
+            --namespace baremetal-operator-system \
+            --for=condition=available \
+            --timeout=5m \
+            deployment.apps/baremetal-operator-controller-manager \
+            deployment.apps/ironic-service
+      - run: |
+          kubectl wait \
+            --namespace ironic-standalone-operator-system \
+            --for=condition=available \
+            --timeout=5m \
+            deployment.apps/ironic-standalone-operator-controller-manager
