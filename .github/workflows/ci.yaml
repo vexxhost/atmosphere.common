@@ -27,8 +27,7 @@ jobs:
             --connection=local \
             --extra-vars target=localhost \
               atmosphere.common.flux
-      - name: Wait flux deployment to be ready
-        run: |
+      - run: |
           kubectl wait \
             --namespace flux-system \
             --for=condition=available \
@@ -51,15 +50,13 @@ jobs:
             --extra-vars target=localhost \
               atmosphere.common.flux \
               atmosphere.common.cert_manager
-      - name: Wait cert-manager HelmRelease to be ready
-        run: |
+      - run: |
           kubectl wait \
             --namespace cert-manager \
             --for=condition=ready \
             --timeout=5m \
             helmrelease/cert-manager
-      - name: Wait cert-manager deployment to be ready
-        run: |
+      - run: |
           kubectl wait \
             --namespace cert-manager \
             --for=condition=available \
@@ -86,30 +83,26 @@ jobs:
               atmosphere.common.flux \
               atmosphere.common.cert_manager \
               atmosphere.common.metal3
-      - name: Wait Baremetal Operator kustomizations to be ready
-        run: |
+      - run: |
           kubectl wait \
             --namespace baremetal-operator-system \
             --for=condition=ready \
             --timeout=5m \
             kustomizations/baremetal-operator
-      - name: Wait Ironic Standalone Operator kustomizations to be ready
-        run: |
+      - run: |
           kubectl wait \
             --namespace ironic-standalone-operator-system \
             --for=condition=ready \
             --timeout=5m \
             kustomizations/ironic-standalone-operator
-      - name: Wait Baremetal Operator deployment to be ready
-        run: |
+      - run: |
           kubectl wait \
             --namespace baremetal-operator-system \
             --for=condition=available \
             --timeout=5m \
             deployment.apps/baremetal-operator-controller-manager \
             deployment.apps/ironic-service
-      - name: Wait Ironic Standalone Operator deployment to be ready
-        run: |
+      - run: |
           kubectl wait \
             --namespace ironic-standalone-operator-system \
             --for=condition=available \
