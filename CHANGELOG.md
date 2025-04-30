@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/vexxhost/atmosphere.common/compare/v0.2.0...v0.3.0) (2025-04-29)
+
+
+### Features
+
+* add dellhw exporter ([#28](https://github.com/vexxhost/atmosphere.common/issues/28)) ([9aae639](https://github.com/vexxhost/atmosphere.common/commit/9aae639f8fcf9eec796f1f712a53e11c27e86e4e))
+
 ## [0.2.0](https://github.com/vexxhost/atmosphere.common/compare/v0.1.3...v0.2.0) (2025-04-14)
 
 
