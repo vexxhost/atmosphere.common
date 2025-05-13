@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/vexxhost/atmosphere.common/compare/v0.3.0...v0.4.0) (2025-05-13)
+
+
+### Features
+
+* add metrics server ([#31](https://github.com/vexxhost/atmosphere.common/issues/31)) ([7ea7e0f](https://github.com/vexxhost/atmosphere.common/commit/7ea7e0fa4e29dc1a93c647aee5e7a160b0f9417f))
+
 ## [0.3.0](https://github.com/vexxhost/atmosphere.common/compare/v0.2.0...v0.3.0) (2025-04-29)
 
 
