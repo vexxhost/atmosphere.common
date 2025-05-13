@@ -10,5 +10,6 @@ metrics_server_helm_release_namespace: kube-system
 metrics_server_helm_release_name: metrics-server
 
 metrics_server_helm_values: {}
+metrics_server_node_selector: {}
 
 metrics_server_image: registry.k8s.io/metrics-server/metrics-server:v0.7.2
