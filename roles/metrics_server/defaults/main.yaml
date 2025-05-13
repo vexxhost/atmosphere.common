@@ -1,0 +1,14 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+metrics_server_helm_repository_name: metrics-server
+metrics_server_helm_repository_url: https://kubernetes-sigs.github.io/metrics-server
+metrics_server_helm_chart_name: metrics-server
+metrics_server_helm_chart_version: 3.12.2
+
+metrics_server_helm_release_namespace: kube-system
+metrics_server_helm_release_name: metrics-server
+
+metrics_server_helm_values: {}
+
+metrics_server_image: registry.k8s.io/metrics-server/metrics-server:v0.7.2

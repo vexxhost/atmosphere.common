@@ -1,0 +1,10 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Deploy "metrics-server"
+  hosts: "{{ target | default('all') }}"
+  gather_facts: false
+  roles:
+    - role: atmosphere.common.metrics_server
+      tags:
+        - metrics-server

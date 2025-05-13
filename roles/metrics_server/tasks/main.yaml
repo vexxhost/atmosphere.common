@@ -1,0 +1,40 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Install "metrics-server"
+  run_once: true
+  kubernetes.core.k8s:
+    server_side_apply:
+      field_manager: "atmosphere.common"
+      force_conflicts: true
+    definition:
+      - apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: "{{ metrics_server_helm_release_namespace }}"
+
+      - apiVersion: source.toolkit.fluxcd.io/v1
+        kind: HelmRepository
+        metadata:
+          name: "{{ metrics_server_helm_repository_name }}"
+          namespace: "{{ metrics_server_helm_release_namespace }}"
+        spec:
+          interval: 60m
+          url: "{{ metrics_server_helm_repository_url }}"
+
+      - apiVersion: helm.toolkit.fluxcd.io/v2
+        kind: HelmRelease
+        metadata:
+          name: "{{ metrics_server_helm_release_name }}"
+          namespace: "{{ metrics_server_helm_release_namespace }}"
+        spec:
+          interval: 10m
+          releaseName: "{{ metrics_server_helm_release_name }}"
+          chart:
+            spec:
+              chart: "{{ metrics_server_helm_chart_name }}"
+              version: "{{ metrics_server_helm_chart_version }}"
+              sourceRef:
+                kind: HelmRepository
+                name: "{{ metrics_server_helm_repository_name }}"
+          values: "{{ _metrics_server_helm_values | combine(metrics_server_helm_values, recursive=True) }}"

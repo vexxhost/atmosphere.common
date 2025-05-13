@@ -1,0 +1,12 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+_metrics_server_helm_values:
+  image:
+    repository: "{{ metrics_server_image | atmosphere.common.docker_image('name') }}"
+    tag: "{{ metrics_server_image | atmosphere.common.docker_image('tag') }}"
+  args:
+  # NOTE(fitbeard): To use secure communication we need to configure
+  #                 TLS bootstraping for kubelet:
+  #                 https://kubernetes.io/docs/reference/access-authn-authz/kubelet-tls-bootstrapping/
+    - --kubelet-insecure-tls
