@@ -48,6 +48,14 @@
       "matchStrings": ["ironic_standalone_operator_version: (?<currentValue>\\S+)"],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "metal3-io/ironic-standalone-operator"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["roles/metrics_server/defaults/main.yaml"],
+      "matchStrings": ["metrics_server_helm_chart_version: (?<currentValue>\\S+)"],
+      "datasourceTemplate": "helm",
+      "depNameTemplate": "metrics-server",
+      "registryUrlTemplate": "https://kubernetes-sigs.github.io/metrics-server"
     }
   ]
 }
