@@ -7,52 +7,78 @@
   ],
   "packageRules": [
     {
-      "matchPackageNames": ["cert-manager"],
+      "matchPackageNames": [
+        "cert-manager"
+      ],
       "extractVersion": "^v(?<version>.*)$"
     }
   ],
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["roles/baremetal_operator/defaults/main.yaml"],
-      "matchStrings": ["baremetal_operator_version: (?<currentValue>\\S+)"],
+      "managerFilePatterns": [
+        "/roles/baremetal_operator/defaults/main.yaml/"
+      ],
+      "matchStrings": [
+        "baremetal_operator_version: (?<currentValue>\\S+)"
+      ],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "metal3-io/baremetal-operator"
     },
     {
       "customType": "regex",
-      "fileMatch": ["roles/cert_manager/defaults/main.yaml"],
-      "matchStrings": ["cert_manager_helm_chart_version: (?<currentValue>\\S+)"],
+      "managerFilePatterns": [
+        "/roles/cert_manager/defaults/main.yaml/"
+      ],
+      "matchStrings": [
+        "cert_manager_helm_chart_version: (?<currentValue>\\S+)"
+      ],
       "datasourceTemplate": "helm",
       "depNameTemplate": "cert-manager",
       "registryUrlTemplate": "https://charts.jetstack.io"
     },
     {
       "customType": "regex",
-      "fileMatch": ["roles/dellhw_exporter/defaults/main.yaml"],
-      "matchStrings": ["dellhw_exporter_helm_chart_version: (?<currentValue>\\S+)"],
+      "managerFilePatterns": [
+        "/roles/dellhw_exporter/defaults/main.yaml/"
+      ],
+      "matchStrings": [
+        "dellhw_exporter_helm_chart_version: (?<currentValue>\\S+)"
+      ],
       "datasourceTemplate": "helm",
       "depNameTemplate": "prometheus-dellhw-exporter",
       "registryUrlTemplate": "https://galexrt.github.io/dellhw_exporter"
     },
     {
       "customType": "regex",
-      "fileMatch": ["roles/flux/defaults/main.yaml"],
-      "matchStrings": ["flux_version: (?<currentValue>\\S+)"],
+      "managerFilePatterns": [
+        "/roles/flux/defaults/main.yaml/"
+      ],
+      "matchStrings": [
+        "flux_version: (?<currentValue>\\S+)"
+      ],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "fluxcd/flux2"
     },
     {
       "customType": "regex",
-      "fileMatch": ["roles/ironic_standalone_operator/defaults/main.yaml"],
-      "matchStrings": ["ironic_standalone_operator_version: (?<currentValue>\\S+)"],
+      "managerFilePatterns": [
+        "/roles/ironic_standalone_operator/defaults/main.yaml/"
+      ],
+      "matchStrings": [
+        "ironic_standalone_operator_version: (?<currentValue>\\S+)"
+      ],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "metal3-io/ironic-standalone-operator"
     },
     {
       "customType": "regex",
-      "fileMatch": ["roles/metrics_server/defaults/main.yaml"],
-      "matchStrings": ["metrics_server_helm_chart_version: (?<currentValue>\\S+)"],
+      "managerFilePatterns": [
+        "/roles/metrics_server/defaults/main.yaml/"
+      ],
+      "matchStrings": [
+        "metrics_server_helm_chart_version: (?<currentValue>\\S+)"
+      ],
       "datasourceTemplate": "helm",
       "depNameTemplate": "metrics-server",
       "registryUrlTemplate": "https://kubernetes-sigs.github.io/metrics-server"
