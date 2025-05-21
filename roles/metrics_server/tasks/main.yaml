@@ -1,6 +1,15 @@
 # Copyright (c) 2025 VEXXHOST, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+- name: Get current HelmRelease
+  run_once: true
+  kubernetes.core.k8s_info:
+    api_version: helm.toolkit.fluxcd.io/v2
+    kind: HelmRelease
+    name: "{{ metrics_server_helm_release_name }}"
+    namespace: "{{ metrics_server_helm_release_namespace }}"
+  register: current_helm_release
+
 - name: Install "metrics-server"
   run_once: true
   kubernetes.core.k8s:
@@ -37,4 +46,9 @@
               sourceRef:
                 kind: HelmRepository
                 name: "{{ metrics_server_helm_repository_name }}"
-          values: "{{ _metrics_server_helm_values | combine(metrics_server_helm_values, recursive=True) }}"
+          values: >-
+            {{
+              current_helm_release.resources[0]['spec']['values'] | default({})
+              | atmosphere.common.nullify_missing_values(metrics_server_helm_values)
+              | atmosphere.common.merge_replace_nulls(_metrics_server_helm_values)
+            }}
