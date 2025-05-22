@@ -8,7 +8,7 @@
     kind: HelmRelease
     name: "{{ metrics_server_helm_release_name }}"
     namespace: "{{ metrics_server_helm_release_namespace }}"
-  register: current_helm_release
+  register: metrics_server_helm_release_current
 
 - name: Install "metrics-server"
   run_once: true
@@ -48,7 +48,7 @@
                 name: "{{ metrics_server_helm_repository_name }}"
           values: >-
             {{
-              current_helm_release.resources[0]['spec']['values'] | default({})
+              metrics_server_helm_release_current.resources[0]['spec']['values'] | default({})
               | atmosphere.common.nullify_missing_values(metrics_server_helm_values)
               | atmosphere.common.merge_replace_nulls(_metrics_server_helm_values)
             }}
