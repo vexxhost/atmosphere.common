@@ -5,6 +5,9 @@
     "group:allDigest",
     "helpers:pinGitHubActionDigestsToSemver"
   ],
+  "lockFileMaintenance": {
+    "enabled": true
+  },
   "packageRules": [
     {
       "matchPackageNames": [
