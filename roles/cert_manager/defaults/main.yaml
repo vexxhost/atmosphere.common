@@ -8,6 +8,7 @@ cert_manager_helm_chart_version: 1.17.2
 
 cert_manager_helm_release_namespace: cert-manager
 cert_manager_helm_release_name: cert-manager
+cert_manager_helm_release_secret_name: "{{ cert_manager_helm_release_name }}-values"
 
 cert_manager_helm_values: {}
 cert_manager_node_selector: {}

@@ -22,11 +22,22 @@
           interval: 60m
           url: "{{ dellhw_exporter_helm_repository_url }}"
 
+      - apiVersion: v1
+        kind: Secret
+        metadata:
+          name: "{{ dellhw_exporter_helm_release_secret_name }}"
+          namespace: "{{ dellhw_exporter_helm_release_namespace }}"
+        type: Opaque
+        stringData:
+          values.yaml: "{{ lookup('atmosphere.common.helm_values', 'dellhw_exporter') }}"
+
       - apiVersion: helm.toolkit.fluxcd.io/v2
         kind: HelmRelease
         metadata:
           name: "{{ dellhw_exporter_helm_release_name }}"
           namespace: "{{ dellhw_exporter_helm_release_namespace }}"
+          annotations:
+            reconcile.fluxcd.io/requestedAt: "{{ lookup('atmosphere.common.helm_values', 'dellhw_exporter') | checksum }}"
         spec:
           interval: 10m
           releaseName: "{{ dellhw_exporter_helm_release_name }}"
@@ -37,4 +48,6 @@
               sourceRef:
                 kind: HelmRepository
                 name: "{{ dellhw_exporter_helm_repository_name }}"
-          values: "{{ _dellhw_exporter_helm_values | combine(dellhw_exporter_helm_values, recursive=True) }}"
+          valuesFrom:
+            - kind: Secret
+              name: "{{ dellhw_exporter_helm_release_secret_name }}"
