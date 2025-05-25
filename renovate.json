@@ -19,7 +19,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["/^main.yml$/"],
+      "managerFilePatterns": ["/main.ya?ml$/"],
       "matchStringsStrategy": "combination",
       "matchStrings": [
         "(.*)_helm_repository_url: (?<registryUrl>\\S+)",
