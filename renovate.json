@@ -19,6 +19,17 @@
   "customManagers": [
     {
       "customType": "regex",
+      "managerFilePatterns": ["/^main.yml$/"],
+      "matchStringsStrategy": "combination",
+      "matchStrings": [
+        "(.*)_helm_repository_url: (?<registryUrl>\\S+)",
+        "(.*)_helm_chart_name: (?<depName>\\S+)",
+        "(.*)_helm_chart_version: (?<currentValue>\\S+)"
+      ],
+      "datasourceTemplate": "helm"
+    },
+    {
+      "customType": "regex",
       "managerFilePatterns": [
         "/roles/baremetal_operator/defaults/main.yaml/"
       ],
@@ -27,30 +38,6 @@
       ],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "metal3-io/baremetal-operator"
-    },
-    {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/roles/cert_manager/defaults/main.yaml/"
-      ],
-      "matchStrings": [
-        "cert_manager_helm_chart_version: (?<currentValue>\\S+)"
-      ],
-      "datasourceTemplate": "helm",
-      "depNameTemplate": "cert-manager",
-      "registryUrlTemplate": "https://charts.jetstack.io"
-    },
-    {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/roles/dellhw_exporter/defaults/main.yaml/"
-      ],
-      "matchStrings": [
-        "dellhw_exporter_helm_chart_version: (?<currentValue>\\S+)"
-      ],
-      "datasourceTemplate": "helm",
-      "depNameTemplate": "prometheus-dellhw-exporter",
-      "registryUrlTemplate": "https://galexrt.github.io/dellhw_exporter"
     },
     {
       "customType": "regex",
@@ -73,18 +60,6 @@
       ],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "metal3-io/ironic-standalone-operator"
-    },
-    {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/roles/metrics_server/defaults/main.yaml/"
-      ],
-      "matchStrings": [
-        "metrics_server_helm_chart_version: (?<currentValue>\\S+)"
-      ],
-      "datasourceTemplate": "helm",
-      "depNameTemplate": "metrics-server",
-      "registryUrlTemplate": "https://kubernetes-sigs.github.io/metrics-server"
     }
   ]
 }
