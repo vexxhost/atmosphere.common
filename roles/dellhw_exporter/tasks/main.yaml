@@ -1,6 +1,15 @@
 # Copyright (c) 2025 VEXXHOST, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+- name: Get current HelmRelease
+  run_once: true
+  kubernetes.core.k8s_info:
+    api_version: helm.toolkit.fluxcd.io/v2
+    kind: HelmRelease
+    name: "{{ dellhw_exporter_helm_release_name }}"
+    namespace: "{{ dellhw_exporter_helm_release_namespace }}"
+  register: dellhw_exporter_helm_release_current
+
 - name: Install "dellhw_exporter"
   run_once: true
   kubernetes.core.k8s:
@@ -37,4 +46,9 @@
               sourceRef:
                 kind: HelmRepository
                 name: "{{ dellhw_exporter_helm_repository_name }}"
-          values: "{{ _dellhw_exporter_helm_values | combine(dellhw_exporter_helm_values, recursive=True) }}"
+          values: >-
+            {{
+              dellhw_exporter_helm_release_current.resources[0]['spec']['values'] | default({})
+              | atmosphere.common.nullify_missing_values(dellhw_exporter_helm_values)
+              | atmosphere.common.merge_replace_nulls(_dellhw_exporter_helm_values)
+            }}
