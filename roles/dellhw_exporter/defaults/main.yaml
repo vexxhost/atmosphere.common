@@ -8,6 +8,7 @@ dellhw_exporter_helm_chart_version: 1.0.3
 
 dellhw_exporter_helm_release_namespace: monitoring
 dellhw_exporter_helm_release_name: prometheus-dellhw-exporter
+dellhw_exporter_helm_release_secret_name: "{{ dellhw_exporter_helm_release_name }}-values"
 
 dellhw_exporter_helm_values: {}
 
