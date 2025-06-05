@@ -1,6 +1,19 @@
 # Copyright (c) 2025 VEXXHOST, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+- name: Get current Helm release info
+  run_once: true
+  kubernetes.core.helm_info:
+    name: "{{ cert_manager_helm_release_name }}"
+    namespace: "{{ cert_manager_helm_release_namespace }}"
+    release_state: all
+  register: cert_manager_helm_info
+
+- name: Set final version for chart values
+  run_once: true
+  ansible.builtin.set_fact:
+    cert_manager_final_helm_values: "{{ lookup('atmosphere.common.helm_values', 'cert_manager', (cert_manager_helm_info.status['values'] | default({}))) }}" # noqa: yaml[line-length]
+
 - name: Install "cert-manager"
   run_once: true
   kubernetes.core.k8s:
@@ -13,15 +26,6 @@
         metadata:
           name: "{{ cert_manager_helm_release_namespace }}"
 
-      - apiVersion: source.toolkit.fluxcd.io/v1
-        kind: HelmRepository
-        metadata:
-          name: "{{ cert_manager_helm_repository_name }}"
-          namespace: "{{ cert_manager_helm_release_namespace }}"
-        spec:
-          interval: 5m
-          url: "{{ cert_manager_helm_repository_url }}"
-
       - apiVersion: v1
         kind: Secret
         metadata:
@@ -29,7 +33,16 @@
           namespace: "{{ cert_manager_helm_release_namespace }}"
         type: Opaque
         stringData:
-          values.yaml: "{{ lookup('atmosphere.common.helm_values', 'cert_manager') }}"
+          values.yaml: "{{ cert_manager_final_helm_values }}"
+
+      - apiVersion: source.toolkit.fluxcd.io/v1
+        kind: HelmRepository
+        metadata:
+          name: "{{ cert_manager_helm_repository_name }}"
+          namespace: "{{ cert_manager_helm_release_namespace }}"
+        spec:
+          interval: 60m
+          url: "{{ cert_manager_helm_repository_url }}"
 
       - apiVersion: helm.toolkit.fluxcd.io/v2
         kind: HelmRelease
@@ -37,7 +50,7 @@
           name: "{{ cert_manager_helm_release_name }}"
           namespace: "{{ cert_manager_helm_release_namespace }}"
           annotations:
-            reconcile.fluxcd.io/requestedAt: "{{ lookup('atmosphere.common.helm_values', 'cert_manager') | checksum }}"
+            reconcile.fluxcd.io/requestedAt: "{{ cert_manager_final_helm_values | checksum }}"
         spec:
           interval: 10m
           releaseName: "{{ cert_manager_helm_release_name }}"

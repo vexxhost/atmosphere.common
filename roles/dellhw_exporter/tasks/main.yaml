@@ -1,7 +1,20 @@
 # Copyright (c) 2025 VEXXHOST, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-- name: Install "dellhw_exporter"
+- name: Get current Helm release info
+  run_once: true
+  kubernetes.core.helm_info:
+    name: "{{ dellhw_exporter_helm_release_name }}"
+    namespace: "{{ dellhw_exporter_helm_release_namespace }}"
+    release_state: all
+  register: dellhw_exporter_helm_info
+
+- name: Set final version for chart values
+  run_once: true
+  ansible.builtin.set_fact:
+    dellhw_exporter_final_helm_values: "{{ lookup('atmosphere.common.helm_values', 'dellhw_exporter', (dellhw_exporter_helm_info.status['values'] | default({}))) }}" # noqa: yaml[line-length]
+
+- name: Install "dellhw-exporter"
   run_once: true
   kubernetes.core.k8s:
     server_side_apply:
@@ -13,6 +26,15 @@
         metadata:
           name: "{{ dellhw_exporter_helm_release_namespace }}"
 
+      - apiVersion: v1
+        kind: Secret
+        metadata:
+          name: "{{ dellhw_exporter_helm_release_secret_name }}"
+          namespace: "{{ dellhw_exporter_helm_release_namespace }}"
+        type: Opaque
+        stringData:
+          values.yaml: "{{ dellhw_exporter_final_helm_values }}"
+
       - apiVersion: source.toolkit.fluxcd.io/v1
         kind: HelmRepository
         metadata:
@@ -22,22 +44,13 @@
           interval: 60m
           url: "{{ dellhw_exporter_helm_repository_url }}"
 
-      - apiVersion: v1
-        kind: Secret
-        metadata:
-          name: "{{ dellhw_exporter_helm_release_secret_name }}"
-          namespace: "{{ dellhw_exporter_helm_release_namespace }}"
-        type: Opaque
-        stringData:
-          values.yaml: "{{ lookup('atmosphere.common.helm_values', 'dellhw_exporter') }}"
-
       - apiVersion: helm.toolkit.fluxcd.io/v2
         kind: HelmRelease
         metadata:
           name: "{{ dellhw_exporter_helm_release_name }}"
           namespace: "{{ dellhw_exporter_helm_release_namespace }}"
           annotations:
-            reconcile.fluxcd.io/requestedAt: "{{ lookup('atmosphere.common.helm_values', 'dellhw_exporter') | checksum }}"
+            reconcile.fluxcd.io/requestedAt: "{{ dellhw_exporter_final_helm_values | checksum }}"
         spec:
           interval: 10m
           releaseName: "{{ dellhw_exporter_helm_release_name }}"

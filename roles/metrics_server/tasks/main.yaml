@@ -1,18 +1,18 @@
 # Copyright (c) 2025 VEXXHOST, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-- name: Install "metrics-server" XXXX
+- name: Get current Helm release info
   run_once: true
-  kubernetes.core.k8s:
-    definition:
-      - apiVersion: v1
-        kind: Secret
-        metadata:
-          name: "{{ metrics_server_helm_release_secret_name }}"
-          namespace: "{{ metrics_server_helm_release_namespace }}"
-        type: Opaque
-        stringData:
-          values.yaml: "{{ lookup('atmosphere.common.helm_values', 'metrics_server') }}"
+  kubernetes.core.helm_info:
+    name: "{{ metrics_server_helm_release_name }}"
+    namespace: "{{ metrics_server_helm_release_namespace }}"
+    release_state: all
+  register: metrics_server_helm_info
+
+- name: Set final version for chart values
+  run_once: true
+  ansible.builtin.set_fact:
+    metrics_server_final_helm_values: "{{ lookup('atmosphere.common.helm_values', 'metrics_server', (metrics_server_helm_info.status['values'] | default({}))) }}" # noqa: yaml[line-length]
 
 - name: Install "metrics-server"
   run_once: true
@@ -25,6 +25,15 @@
         kind: Namespace
         metadata:
           name: "{{ metrics_server_helm_release_namespace }}"
+
+      - apiVersion: v1
+        kind: Secret
+        metadata:
+          name: "{{ metrics_server_helm_release_secret_name }}"
+          namespace: "{{ metrics_server_helm_release_namespace }}"
+        type: Opaque
+        stringData:
+          values.yaml: "{{ metrics_server_final_helm_values }}"
 
       - apiVersion: source.toolkit.fluxcd.io/v1
         kind: HelmRepository
@@ -41,11 +50,9 @@
           name: "{{ metrics_server_helm_release_name }}"
           namespace: "{{ metrics_server_helm_release_namespace }}"
           annotations:
-            reconcile.fluxcd.io/requestedAt: "{{ lookup('atmosphere.common.helm_values', 'metrics_server') | checksum }}"
-            reconcile.fluxcd.io/forceAt: "{{ lookup('atmosphere.common.helm_values', 'metrics_server') | checksum }}"
+            reconcile.fluxcd.io/requestedAt: "{{ metrics_server_final_helm_values | checksum }}"
         spec:
-          interval: 5m
-          timeout: 5m
+          interval: 10m
           releaseName: "{{ metrics_server_helm_release_name }}"
           chart:
             spec:
