@@ -1,40 +1,14 @@
 # Copyright (c) 2025 VEXXHOST, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-- name: Install "cert-manager"
+- name: Deploy Helm chart
   run_once: true
-  kubernetes.core.k8s:
-    server_side_apply:
-      field_manager: "atmosphere.common"
-      force_conflicts: true
-    definition:
-      - apiVersion: v1
-        kind: Namespace
-        metadata:
-          name: "{{ cert_manager_helm_release_namespace }}"
-
-      - apiVersion: source.toolkit.fluxcd.io/v1
-        kind: HelmRepository
-        metadata:
-          name: "{{ cert_manager_helm_repository_name }}"
-          namespace: "{{ cert_manager_helm_release_namespace }}"
-        spec:
-          interval: 5m
-          url: "{{ cert_manager_helm_repository_url }}"
-
-      - apiVersion: helm.toolkit.fluxcd.io/v2
-        kind: HelmRelease
-        metadata:
-          name: "{{ cert_manager_helm_release_name }}"
-          namespace: "{{ cert_manager_helm_release_namespace }}"
-        spec:
-          interval: 10m
-          releaseName: "{{ cert_manager_helm_release_name }}"
-          chart:
-            spec:
-              chart: "{{ cert_manager_helm_chart_name }}"
-              version: "{{ cert_manager_helm_chart_version }}"
-              sourceRef:
-                kind: HelmRepository
-                name: "{{ cert_manager_helm_repository_name }}"
-          values: "{{ _cert_manager_helm_values | combine(cert_manager_helm_values, recursive=True) }}"
+  kubernetes.core.helm:
+    name: "{{ cert_manager_helm_release_name }}"
+    chart_repo_url: "{{ cert_manager_helm_repository_url }}"
+    chart_ref: "{{ cert_manager_helm_chart_name }}"
+    chart_version: "{{ cert_manager_helm_chart_version }}"
+    release_namespace: "{{ cert_manager_helm_release_namespace }}"
+    create_namespace: true
+    kubeconfig: "{{ cert_manager_helm_kubeconfig }}"
+    values: "{{ _cert_manager_helm_values | combine(cert_manager_helm_values, recursive=True) }}"

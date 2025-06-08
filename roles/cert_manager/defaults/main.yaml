@@ -1,13 +1,13 @@
 # Copyright (c) 2025 VEXXHOST, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-cert_manager_helm_repository_name: jetstack
 cert_manager_helm_repository_url: https://charts.jetstack.io
 cert_manager_helm_chart_name: cert-manager
 cert_manager_helm_chart_version: 1.17.2
 
 cert_manager_helm_release_namespace: cert-manager
 cert_manager_helm_release_name: cert-manager
+cert_manager_helm_kubeconfig: "{{ kubeconfig_path | default('/etc/kubernetes/admin.conf') }}"
 
 cert_manager_helm_values: {}
 cert_manager_node_selector: {}
