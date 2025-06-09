@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/vexxhost/atmosphere.common/compare/v0.4.0...v0.5.0) (2025-06-09)
+
+
+### Miscellaneous Chores
+
+* release 0.5.0 ([8c3f870](https://github.com/vexxhost/atmosphere.common/commit/8c3f870b0abdfd75970812f814ac15965eaa402d))
+
 ## [0.4.0](https://github.com/vexxhost/atmosphere.common/compare/v0.3.0...v0.4.0) (2025-05-13)
 
 
