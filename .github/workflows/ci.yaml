@@ -42,6 +42,7 @@ jobs:
           uv run ansible-playbook \
             --connection=local \
             --extra-vars target=localhost \
+            --extra-vars kubeconfig_path=$HOME/.kube/config \
               atmosphere.common.cert_manager
       - run: |
           kubectl wait \
@@ -63,6 +64,7 @@ jobs:
           uv run ansible-playbook \
             --connection=local \
             --extra-vars target=localhost \
+            --extra-vars kubeconfig_path=$HOME/.kube/config \
             --extra-vars ironic_standalone_ip_address=172.18.0.2 \
             --extra-vars ironic_standalone_dhcp_cidr=172.18.0.0/24 \
             --extra-vars ironic_standalone_dhcp_range_start=172.18.0.10 \
@@ -107,6 +109,7 @@ jobs:
           uv run ansible-playbook \
             --connection=local \
             --extra-vars target=localhost \
+            --extra-vars kubeconfig_path=$HOME/.kube/config \
               atmosphere.common.dellhw_exporter
       - run: |
           kubectl wait \
@@ -126,6 +129,7 @@ jobs:
           uv run ansible-playbook \
             --connection=local \
             --extra-vars target=localhost \
+            --extra-vars kubeconfig_path=$HOME/.kube/config \
               atmosphere.common.metrics_server
       - name: Wait for Metrics Server to be ready
         run: |
