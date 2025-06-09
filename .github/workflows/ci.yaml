@@ -42,14 +42,8 @@ jobs:
           uv run ansible-playbook \
             --connection=local \
             --extra-vars target=localhost \
-              atmosphere.common.flux \
+            --extra-vars kubeconfig_path=$HOME/.kube/config \
               atmosphere.common.cert_manager
-      - run: |
-          kubectl wait \
-            --namespace cert-manager \
-            --for=condition=ready \
-            --timeout=5m \
-            helmrelease/cert-manager
       - run: |
           kubectl wait \
             --namespace cert-manager \
@@ -70,6 +64,7 @@ jobs:
           uv run ansible-playbook \
             --connection=local \
             --extra-vars target=localhost \
+            --extra-vars kubeconfig_path=$HOME/.kube/config \
             --extra-vars ironic_standalone_ip_address=172.18.0.2 \
             --extra-vars ironic_standalone_dhcp_cidr=172.18.0.0/24 \
             --extra-vars ironic_standalone_dhcp_range_start=172.18.0.10 \
@@ -114,14 +109,8 @@ jobs:
           uv run ansible-playbook \
             --connection=local \
             --extra-vars target=localhost \
-              atmosphere.common.flux \
+            --extra-vars kubeconfig_path=$HOME/.kube/config \
               atmosphere.common.dellhw_exporter
-      - run: |
-          kubectl wait \
-            --namespace monitoring \
-            --for=condition=ready \
-            --timeout=5m \
-            helmrelease/prometheus-dellhw-exporter
       - run: |
           kubectl wait \
             --namespace monitoring \
@@ -136,20 +125,12 @@ jobs:
       - uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
       - uses: astral-sh/setup-uv@f0ec1fc3b38f5e7cd731bb6ce540c5af426746bb # v6.1.0
       - run: uv run ansible-galaxy collection install ${{ github.workspace }}
-      - name: Apply metrics-server HelmRelease
-        run: |
+      - run: |
           uv run ansible-playbook \
             --connection=local \
             --extra-vars target=localhost \
-              atmosphere.common.flux \
+            --extra-vars kubeconfig_path=$HOME/.kube/config \
               atmosphere.common.metrics_server
-      - name: Wait for metrics-server HelmRelease to be ready
-        run: |
-          kubectl wait \
-            --namespace kube-system \
-            --for=condition=ready \
-            --timeout=5m \
-            helmrelease/metrics-server
       - name: Wait for Metrics Server to be ready
         run: |
           kubectl wait \
