@@ -168,3 +168,24 @@ jobs:
           kubectl top nodes
           echo "Checking kubectl top pods:"
           kubectl top pods --all-namespaces
+
+  vault-operator:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
+      - uses: astral-sh/setup-uv@a02a550bdd3185dba2ebb6aa98d77047ce54ad21 # v6.2.1
+      - run: uv run ansible-galaxy collection install ${{ github.workspace }}
+      - run: |
+          uv run ansible-playbook \
+            --connection=local \
+            --extra-vars target=localhost \
+            --extra-vars kubeconfig_path=$HOME/.kube/config \
+              atmosphere.common.vault_operator
+      - name: Wait for Metrics Server to be ready
+        run: |
+          kubectl wait \
+            --namespace vault-operator-system \
+            --for=condition=available \
+            --timeout=90s \
+            deployment.apps/vault-operator

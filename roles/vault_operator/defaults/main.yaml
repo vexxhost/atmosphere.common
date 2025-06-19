@@ -1,0 +1,14 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+vault_operator_helm_chart_ref: oci://ghcr.io/bank-vaults/helm-charts/vault-operator:1.22.6
+
+vault_operator_helm_release_namespace: vault-operator-system
+vault_operator_helm_release_name: vault-operator
+vault_operator_helm_kubeconfig: "{{ kubeconfig_path | default('/etc/kubernetes/admin.conf') }}"
+
+vault_operator_helm_values: {}
+vault_operator_node_selector: {}
+
+vault_operator_image: ghcr.io/bank-vaults/vault-operator:v1.22.6
+vault_operator_bank_vaults_image: ghcr.io/bank-vaults/bank-vaults:v1.31.4
