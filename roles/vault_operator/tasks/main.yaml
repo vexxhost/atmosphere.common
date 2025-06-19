@@ -1,0 +1,14 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Deploy Helm chart
+  run_once: true
+  kubernetes.core.helm:
+    name: "{{ vault_operator_helm_release_name }}"
+    chart_repo_url: "{{ vault_operator_helm_repository_url | default(omit) }}"
+    chart_ref: "{{ vault_operator_helm_chart_ref | default(omit) }}"
+    chart_version: "{{ vault_operator_helm_chart_version | default(omit) }}"
+    release_namespace: "{{ vault_operator_helm_release_namespace }}"
+    create_namespace: true
+    kubeconfig: "{{ vault_operator_helm_kubeconfig }}"
+    values: "{{ _vault_operator_helm_values | combine(vault_operator_helm_values, recursive=True) }}"
