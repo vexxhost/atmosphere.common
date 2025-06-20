@@ -182,7 +182,7 @@ jobs:
             --extra-vars target=localhost \
             --extra-vars kubeconfig_path=$HOME/.kube/config \
               atmosphere.common.vault_operator
-      - name: Wait for Metrics Server to be ready
+      - name: Wait for Vault Operator to be ready
         run: |
           kubectl wait \
             --namespace vault-operator-system \

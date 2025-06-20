@@ -12,3 +12,9 @@ vault_operator_node_selector: {}
 
 vault_operator_image: ghcr.io/bank-vaults/vault-operator:v1.22.6
 vault_operator_bank_vaults_image: ghcr.io/bank-vaults/bank-vaults:v1.31.4
+
+# Download URL for the Vault Operator CRDs
+vault_operator_crds_download_url: "https://raw.githubusercontent.com/bank-vaults/vault-operator/refs/tags/{{ vault_operator_image | atmosphere.common.docker_image('tag') }}/deploy/charts/vault-operator/crds/crd.yaml" # noqa: yaml[line-length]
+
+# Destination for the downloaded Vault Operator CRDs
+vault_operator_crds_download_dest: "{{ download_artifact_work_directory }}/vault-operator-{{ vault_operator_image | atmosphere.common.docker_image('tag') }}-crd.yaml"
