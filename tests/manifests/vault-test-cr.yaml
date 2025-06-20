@@ -18,7 +18,6 @@ spec:
     - metadata:
         name: vault-raft
       spec:
-        storageClassName: general
         accessModes:
           - ReadWriteOnce
         resources:
