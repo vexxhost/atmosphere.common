@@ -1,0 +1,26 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+galaxy_info:
+  author: VEXXHOST, Inc.
+  description: Ansible role for Vault Operator
+  license: Apache-2.0
+  min_ansible_version: 5.5.0
+  standalone: false
+  platforms:
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+        - noble
+
+dependencies:
+  - role: atmosphere.common.download_artifact
+    vars:
+      download_artifact_url: "{{ vault_operator_crds_download_url }}"
+      download_artifact_dest: "{{ vault_operator_crds_download_dest }}"
+      download_artifact_owner: root
