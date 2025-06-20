@@ -1,6 +1,17 @@
 # Copyright (c) 2025 VEXXHOST, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+- name: Install CRDs
+  run_once: true
+  changed_when: false
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', vault_operator_crds_download_dest) | from_yaml_all }}"
+    apply: true
+    server_side_apply:
+      field_manager: atmosphere
+      force_conflicts: true
+
 - name: Deploy Helm chart
   run_once: true
   kubernetes.core.helm:
@@ -12,3 +23,88 @@
     create_namespace: true
     kubeconfig: "{{ vault_operator_helm_kubeconfig }}"
     values: "{{ _vault_operator_helm_values | combine(vault_operator_helm_values, recursive=True) }}"
+
+- name: Apply RBAC manifests for Vault Operator
+  run_once: true
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      - apiVersion: v1
+        kind: ServiceAccount
+        metadata:
+          name: vault
+          namespace: "{{ vault_operator_helm_release_namespace }}"
+
+      - apiVersion: rbac.authorization.k8s.io/v1
+        kind: Role
+        metadata:
+          name: vault
+          namespace: "{{ vault_operator_helm_release_namespace }}"
+        rules:
+          - apiGroups: [""]
+            resources: ["pods"]
+            verbs: ["get", "patch", "update"]
+          - apiGroups: [""]
+            resources: ["secrets"]
+            verbs: ["*"]
+
+      - apiVersion: rbac.authorization.k8s.io/v1
+        kind: RoleBinding
+        metadata:
+          name: vault
+          namespace: "{{ vault_operator_helm_release_namespace }}"
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: Role
+          name: vault
+        subjects:
+          - kind: ServiceAccount
+            name: vault
+            namespace: "{{ vault_operator_helm_release_namespace }}"
+
+      - apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRoleBinding
+        metadata:
+          name: vault-auth-delegator
+          namespace: "{{ vault_operator_helm_release_namespace }}"
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: system:auth-delegator
+        subjects:
+          - kind: ServiceAccount
+            name: vault
+            namespace: "{{ vault_operator_helm_release_namespace }}"
+
+      - apiVersion: rbac.authorization.k8s.io/v1
+        kind: Role
+        metadata:
+          name: leader-election-role
+          namespace: "{{ vault_operator_helm_release_namespace }}"
+        rules:
+          - apiGroups: [""]
+            resources: ["configmaps"]
+            verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+          - apiGroups: ["coordination.k8s.io"]
+            resources: ["leases"]
+            verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+          - apiGroups: [""]
+            resources: ["events"]
+            verbs: ["create", "patch"]
+          - apiGroups: ["authentication.k8s.io"]
+            resources: ["tokenreviews"]
+            verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+      - apiVersion: rbac.authorization.k8s.io/v1
+        kind: RoleBinding
+        metadata:
+          name: leader-election-rolebinding
+          namespace: "{{ vault_operator_helm_release_namespace }}"
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: Role
+          name: leader-election-role
+        subjects:
+          - kind: ServiceAccount
+            name: vault
+            namespace: "{{ vault_operator_helm_release_namespace }}"
