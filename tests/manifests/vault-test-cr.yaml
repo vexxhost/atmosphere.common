@@ -1,0 +1,64 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+---
+apiVersion: vault.banzaicloud.com/v1alpha1
+kind: Vault
+metadata:
+  name: vault-test
+  namespace: vault-operator-system
+  labels:
+    app.kubernetes.io/name: vault-test
+    vault_cr: vault-test
+spec:
+  size: 1
+  image: hashicorp/vault:1.19.5
+  serviceAccount: vault
+  serviceType: ClusterIP
+  volumeClaimTemplates:
+    - metadata:
+        name: vault-raft
+      spec:
+        storageClassName: general
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+  volumes:
+    - name: vault-raft
+      persistentVolumeClaim:
+        claimName: vault-raft
+  volumeMounts:
+    - name: vault-raft
+      mountPath: /vault/data
+  caNamespaces:
+    - "*"
+  unsealConfig:
+    options:
+      preFlightChecks: true
+      storeRootToken: true
+      secretShares: 5
+      secretThreshold: 3
+    kubernetes:
+      secretNamespace: vault-operator-system
+  config:
+    storage:
+      raft:
+        path: /vault/data
+    listener:
+      tcp:
+        address: 0.0.0.0:8200
+        tls_cert_file: /vault/tls/server.crt
+        tls_key_file: /vault/tls/server.key
+    api_addr: https://vault.vault:8200
+    cluster_addr: "https://${.Env.POD_NAME}:8201"
+    disable_mlock: true
+    ui: true
+    plugin_directory: /vault/plugins
+    service_registration:
+      kubernetes: {}
+    telemetry:
+      unauthenticated_metrics_access: true
+  statsdDisabled: true
+  serviceRegistrationEnabled: true
+  externalConfig: {}
