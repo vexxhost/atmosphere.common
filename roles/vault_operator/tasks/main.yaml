@@ -1,12 +1,18 @@
 # Copyright (c) 2025 VEXXHOST, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+- name: Slurp remote CRD file
+  run_once: true
+  slurp:
+    src: "{{ vault_operator_crds_download_dest }}"
+  register: crd_content
+
 - name: Install CRDs
   run_once: true
   changed_when: false
   kubernetes.core.k8s:
     state: present
-    definition: "{{ lookup('file', vault_operator_crds_download_dest) | from_yaml_all }}"
+    definition: "{{ crd_content['content'] | b64decode | from_yaml_all }}"
     apply: true
     server_side_apply:
       field_manager: atmosphere
@@ -16,9 +22,8 @@
   run_once: true
   kubernetes.core.helm:
     name: "{{ vault_operator_helm_release_name }}"
-    chart_repo_url: "{{ vault_operator_helm_repository_url | default(omit) }}"
-    chart_ref: "{{ vault_operator_helm_chart_ref | default(omit) }}"
-    chart_version: "{{ vault_operator_helm_chart_version | default(omit) }}"
+    chart_ref: "{{ vault_operator_helm_chart_ref }}"
+    chart_version: "{{ vault_operator_helm_chart_version }}"
     release_namespace: "{{ vault_operator_helm_release_namespace }}"
     create_namespace: true
     kubeconfig: "{{ vault_operator_helm_kubeconfig }}"
