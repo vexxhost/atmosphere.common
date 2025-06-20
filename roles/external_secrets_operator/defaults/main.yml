@@ -1,0 +1,15 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+external_secrets_operator_helm_repository_url: https://charts.external-secrets.io
+external_secrets_operator_helm_chart_name: external-secrets
+external_secrets_operator_helm_chart_version: v0.18.0
+
+external_secrets_operator_helm_release_namespace: external-secrets
+external_secrets_operator_helm_release_name: external-secrets
+external_secrets_operator_helm_kubeconfig: "{{ kubeconfig_path | default('/etc/kubernetes/admin.conf') }}"
+
+external_secrets_operator_helm_values: {}
+external_secrets_operator_node_selector: {}
+
+external_secrets_operator_image: oci.external-secrets.io/external-secrets/external-secrets:v0.18.0
