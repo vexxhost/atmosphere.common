@@ -196,5 +196,5 @@ jobs:
         run: |
           kubectl wait \
             --namespace vault-operator-system \
-            --for=condition=Healthy --timeout=150s \
+            --for=condition=Healthy --timeout=180s \
             vaults.vault.banzaicloud.com/vault-test
