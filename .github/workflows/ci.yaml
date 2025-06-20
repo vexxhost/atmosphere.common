@@ -191,9 +191,10 @@ jobs:
             deployment.apps/vault-operator
       - name: Apply Vault CR
         run: |
-          kubectl apply --wait=true -f ./tests/manifests/vault-test-cr.yaml
-          sleep 30
-      - name: Assert Vault Exists and is Ready and Unsealed
+          kubectl apply -f ./tests/manifests/vault-test-cr.yaml
+      - name: Wait for Vault CR to be ready
         run: |
-          echo "Checking Vault status"
-          kubectl get vaults.vault.banzaicloud.com vault-test -n vault-operator-system -o json | jq -r '.status.conditions[] | select(.type=="Healthy") | .status' | grep -q 'True'
+          kubectl wait \
+            --namespace vault-operator-system \
+            --for=condition=Healthy --timeout=150s \
+            vaults.vault.banzaicloud.com/vault-test
