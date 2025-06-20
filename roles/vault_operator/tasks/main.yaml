@@ -3,7 +3,7 @@
 
 - name: Slurp remote CRD file
   run_once: true
-  slurp:
+  ansible.builtin.slurp:
     src: "{{ vault_operator_crds_download_dest }}"
   register: crd_content
 
