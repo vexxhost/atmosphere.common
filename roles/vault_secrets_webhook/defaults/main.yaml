@@ -1,0 +1,15 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+vault_secrets_webhook_helm_chart_ref: oci://ghcr.io/bank-vaults/helm-charts/vault-secrets-webhook
+vault_secrets_webhook_helm_chart_version: 1.21.4
+
+vault_secrets_webhook_helm_release_namespace: vault-operator-system
+vault_secrets_webhook_helm_release_name: vault-secrets-webhook
+vault_secrets_webhook_helm_kubeconfig: "{{ kubeconfig_path | default('/etc/kubernetes/admin.conf') }}"
+
+vault_secrets_webhook_helm_values: {}
+vault_secrets_webhook_node_selector: {}
+
+vault_secrets_webhook_image: ghcr.io/bank-vaults/vault-secrets-webhook:v1.21.4
+vault_secrets_webhook_vault_env_image: ghcr.io/bank-vaults/vault-env:v1.21.9
