@@ -12,3 +12,20 @@
     create_namespace: true
     kubeconfig: "{{ external_secrets_operator_helm_kubeconfig }}"
     values: "{{ _external_secrets_operator_helm_values | combine(external_secrets_operator_helm_values, recursive=True) }}"
+
+- name: Wait for 'external-secrets' deployment to be available
+  run_once: true
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: Deployment
+    name: "{{ external_secrets_operator_helm_release_name }}"
+    namespace: "{{ external_secrets_operator_helm_release_namespace }}"
+    kubeconfig: "{{ external_secrets_operator_helm_kubeconfig }}"
+  retries: 18
+  delay: 5
+  register: result
+  until: >
+    result.resources[0].status.conditions is defined and
+    result.resources[0].status.conditions |
+    selectattr('type', 'equalto', 'Available') |
+    selectattr('status', 'equalto', 'True') | list | length > 0

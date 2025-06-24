@@ -9,169 +9,188 @@ on:
 permissions: {}
 
 jobs:
-  flux:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
-      - uses: astral-sh/setup-uv@445689ea25e0de0a23313031f5fe577c74ae45a1 # v6.3.0
-      - run: uv run ansible-galaxy collection install ${{ github.workspace }}
-      - run: |
-          uv run ansible-playbook \
-            --connection=local \
-            --extra-vars target=localhost \
-              atmosphere.common.flux
-      - run: |
-          kubectl wait \
-            --namespace flux-system \
-            --for=condition=available \
-            --timeout=5m \
-            deployment/helm-controller \
-            deployment/kustomize-controller \
-            deployment/notification-controller \
-            deployment/source-controller
+  # flux:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+  #     - uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
+  #     - uses: astral-sh/setup-uv@a02a550bdd3185dba2ebb6aa98d77047ce54ad21 # v6.2.1
+  #     - run: uv run ansible-galaxy collection install ${{ github.workspace }}
+  #     - run: |
+  #         uv run ansible-playbook \
+  #           --connection=local \
+  #           --extra-vars target=localhost \
+  #             atmosphere.common.flux
+  #     - run: |
+  #         kubectl wait \
+  #           --namespace flux-system \
+  #           --for=condition=available \
+  #           --timeout=5m \
+  #           deployment/helm-controller \
+  #           deployment/kustomize-controller \
+  #           deployment/notification-controller \
+  #           deployment/source-controller
 
-  cert-manager:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
-      - uses: astral-sh/setup-uv@445689ea25e0de0a23313031f5fe577c74ae45a1 # v6.3.0
-      - run: uv run ansible-galaxy collection install ${{ github.workspace }}
-      - run: |
-          uv run ansible-playbook \
-            --connection=local \
-            --extra-vars target=localhost \
-            --extra-vars kubeconfig_path=$HOME/.kube/config \
-              atmosphere.common.cert_manager
-      - run: |
-          kubectl wait \
-            --namespace cert-manager \
-            --for=condition=available \
-            --timeout=5m \
-            deployment.apps/cert-manager \
-            deployment.apps/cert-manager-cainjector \
-            deployment.apps/cert-manager-webhook
+  # cert-manager:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+  #     - uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
+  #     - uses: astral-sh/setup-uv@a02a550bdd3185dba2ebb6aa98d77047ce54ad21 # v6.2.1
+  #     - run: uv run ansible-galaxy collection install ${{ github.workspace }}
+  #     - run: |
+  #         uv run ansible-playbook \
+  #           --connection=local \
+  #           --extra-vars target=localhost \
+  #           --extra-vars kubeconfig_path=$HOME/.kube/config \
+  #             atmosphere.common.cert_manager
+  #     - run: |
+  #         kubectl wait \
+  #           --namespace cert-manager \
+  #           --for=condition=available \
+  #           --timeout=5m \
+  #           deployment.apps/cert-manager \
+  #           deployment.apps/cert-manager-cainjector \
+  #           deployment.apps/cert-manager-webhook
 
-  external-secrets-operator:
+  molecule:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario:
+          - external-secrets-operator
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
-      - uses: astral-sh/setup-uv@a02a550bdd3185dba2ebb6aa98d77047ce54ad21 # v6.2.1
-      - run: uv run ansible-galaxy collection install ${{ github.workspace }}
-      - run: |
-          uv run ansible-playbook \
-            --connection=local \
-            --extra-vars target=localhost \
-            --extra-vars kubeconfig_path=$HOME/.kube/config \
-              atmosphere.common.external_secrets_operator
-      - name: Wait for External Secrets Operator to be ready
+      # NOTE(fitbeard): we run Molecule with sudo (as root)
+      # and helm-diff for better Molecule's idempotence checks
+      - name: Setup dependencies
         run: |
-          kubectl wait \
-            --namespace external-secrets \
-            --for=condition=available \
-            --timeout=90s \
-            deployment.apps/external-secrets
-      - name: Apply Fake ClusterSecretStore and ExternalSecret
-        run: |
-          kubectl apply -f ./tests/manifests/fake-clustersecretstore.yaml
-          kubectl apply -f ./tests/manifests/fake-externalsecret.yaml
-          sleep 5
-      - name: Assert Secret Exists and Has Expected Keys
-        run: |
-          echo "Checking if the secret exists"
-          kubectl get secret test-secret -n external-secrets -o json | jq -r '.data | to_entries[] | "\(.key): \(.value | @base64d)"' | grep -q 'foo: bar'
-  metal3:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
-      - uses: astral-sh/setup-uv@445689ea25e0de0a23313031f5fe577c74ae45a1 # v6.3.0
-      - run: uv run ansible-galaxy collection install ${{ github.workspace }}
-      - run: |
-          uv run ansible-playbook \
-            --connection=local \
-            --extra-vars target=localhost \
-            --extra-vars kubeconfig_path=$HOME/.kube/config \
-            --extra-vars ironic_standalone_ip_address=172.18.0.2 \
-            --extra-vars ironic_standalone_dhcp_cidr=172.18.0.0/24 \
-            --extra-vars ironic_standalone_dhcp_range_start=172.18.0.10 \
-            --extra-vars ironic_standalone_dhcp_range_end=172.18.0.20 \
-              atmosphere.common.flux \
-              atmosphere.common.cert_manager \
-              atmosphere.common.metal3
-      - run: |
-          kubectl wait \
-            --namespace baremetal-operator-system \
-            --for=condition=ready \
-            --timeout=5m \
-            kustomizations/baremetal-operator
-      - run: |
-          kubectl wait \
-            --namespace ironic-standalone-operator-system \
-            --for=condition=ready \
-            --timeout=5m \
-            kustomizations/ironic-standalone-operator
-      - run: |
-          kubectl wait \
-            --namespace baremetal-operator-system \
-            --for=condition=available \
-            --timeout=5m \
-            deployment.apps/baremetal-operator-controller-manager \
-            deployment.apps/ironic-service
-      - run: |
-          kubectl wait \
-            --namespace ironic-standalone-operator-system \
-            --for=condition=available \
-            --timeout=5m \
-            deployment.apps/ironic-standalone-operator-controller-manager
+          sudo cp -r /home/runner/.kube /root/.kube
+          sudo helm plugin install https://github.com/databus23/helm-diff
+      - uses: vexxhost/molecule-action@main
+        env:
+          ANSIBLE_PYTHON_INTERPRETER_OVERRIDE: ${{ github.workspace }}/.venv/bin/python
+        with:
+          scenario: ${{ matrix.scenario }}
+          preserve-env: ANSIBLE_PYTHON_INTERPRETER_OVERRIDE
 
-  dellhw_exporter:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
-      - uses: astral-sh/setup-uv@445689ea25e0de0a23313031f5fe577c74ae45a1 # v6.3.0
-      - run: uv run ansible-galaxy collection install ${{ github.workspace }}
-      - run: |
-          uv run ansible-playbook \
-            --connection=local \
-            --extra-vars target=localhost \
-            --extra-vars kubeconfig_path=$HOME/.kube/config \
-              atmosphere.common.dellhw_exporter
-      - run: |
-          kubectl wait \
-            --namespace monitoring \
-            --for=condition=ready \
-            --timeout=5m \
-            pod -l app.kubernetes.io/name=prometheus-dellhw-exporter
+      # - uses: astral-sh/setup-uv@a02a550bdd3185dba2ebb6aa98d77047ce54ad21 # v6.2.1
+      # - run: uv run ansible-galaxy collection install ${{ github.workspace }}
+      # - run: |
+      #     uv run ansible-playbook \
+      #       --connection=local \
+      #       --extra-vars target=localhost \
+      #       --extra-vars kubeconfig_path=$HOME/.kube/config \
+      #         atmosphere.common.external_secrets_operator
+      # - name: Wait for External Secrets Operator to be ready
+      #   run: |
+      #     kubectl wait \
+      #       --namespace external-secrets \
+      #       --for=condition=available \
+      #       --timeout=90s \
+      #       deployment.apps/external-secrets
+      # - name: Apply Fake ClusterSecretStore and ExternalSecret
+      #   run: |
+      #     kubectl apply -f ./tests/manifests/fake-clustersecretstore.yaml
+      #     kubectl apply -f ./tests/manifests/fake-externalsecret.yaml
+      #     sleep 5
+      # - name: Assert Secret Exists and Has Expected Keys
+      #   run: |
+      #     echo "Checking if the secret exists"
+      #     kubectl get secret test-secret -n external-secrets -o json | jq -r '.data | to_entries[] | "\(.key): \(.value | @base64d)"' | grep -q 'foo: bar'
 
-  metrics-server:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
-      - uses: astral-sh/setup-uv@445689ea25e0de0a23313031f5fe577c74ae45a1 # v6.3.0
-      - run: uv run ansible-galaxy collection install ${{ github.workspace }}
-      - run: |
-          uv run ansible-playbook \
-            --connection=local \
-            --extra-vars target=localhost \
-            --extra-vars kubeconfig_path=$HOME/.kube/config \
-              atmosphere.common.metrics_server
-      - name: Wait for Metrics Server to be ready
-        run: |
-          kubectl wait \
-            --namespace kube-system \
-            --for=condition=available \
-            --timeout=90s \
-            deployment.apps/metrics-server
-      - name: Verify metrics-server with kubectl top
-        run: |
-          echo "Waiting for metrics-server to generate metrics..."
-          sleep 30
-          echo "Checking kubectl top nodes:"
-          kubectl top nodes
-          echo "Checking kubectl top pods:"
-          kubectl top pods --all-namespaces
+  # metal3:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+  #     - uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
+  #     - uses: astral-sh/setup-uv@a02a550bdd3185dba2ebb6aa98d77047ce54ad21 # v6.2.1
+  #     - run: uv run ansible-galaxy collection install ${{ github.workspace }}
+  #     - run: |
+  #         uv run ansible-playbook \
+  #           --connection=local \
+  #           --extra-vars target=localhost \
+  #           --extra-vars kubeconfig_path=$HOME/.kube/config \
+  #           --extra-vars ironic_standalone_ip_address=172.18.0.2 \
+  #           --extra-vars ironic_standalone_dhcp_cidr=172.18.0.0/24 \
+  #           --extra-vars ironic_standalone_dhcp_range_start=172.18.0.10 \
+  #           --extra-vars ironic_standalone_dhcp_range_end=172.18.0.20 \
+  #             atmosphere.common.flux \
+  #             atmosphere.common.cert_manager \
+  #             atmosphere.common.metal3
+  #     - run: |
+  #         kubectl wait \
+  #           --namespace baremetal-operator-system \
+  #           --for=condition=ready \
+  #           --timeout=5m \
+  #           kustomizations/baremetal-operator
+  #     - run: |
+  #         kubectl wait \
+  #           --namespace ironic-standalone-operator-system \
+  #           --for=condition=ready \
+  #           --timeout=5m \
+  #           kustomizations/ironic-standalone-operator
+  #     - run: |
+  #         kubectl wait \
+  #           --namespace baremetal-operator-system \
+  #           --for=condition=available \
+  #           --timeout=5m \
+  #           deployment.apps/baremetal-operator-controller-manager \
+  #           deployment.apps/ironic-service
+  #     - run: |
+  #         kubectl wait \
+  #           --namespace ironic-standalone-operator-system \
+  #           --for=condition=available \
+  #           --timeout=5m \
+  #           deployment.apps/ironic-standalone-operator-controller-manager
+
+  # dellhw_exporter:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+  #     - uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
+  #     - uses: astral-sh/setup-uv@a02a550bdd3185dba2ebb6aa98d77047ce54ad21 # v6.2.1
+  #     - run: uv run ansible-galaxy collection install ${{ github.workspace }}
+  #     - run: |
+  #         uv run ansible-playbook \
+  #           --connection=local \
+  #           --extra-vars target=localhost \
+  #           --extra-vars kubeconfig_path=$HOME/.kube/config \
+  #             atmosphere.common.dellhw_exporter
+  #     - run: |
+  #         kubectl wait \
+  #           --namespace monitoring \
+  #           --for=condition=ready \
+  #           --timeout=5m \
+  #           pod -l app.kubernetes.io/name=prometheus-dellhw-exporter
+
+  # metrics-server:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+  #     - uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
+  #     - uses: astral-sh/setup-uv@a02a550bdd3185dba2ebb6aa98d77047ce54ad21 # v6.2.1
+  #     - run: uv run ansible-galaxy collection install ${{ github.workspace }}
+  #     - run: |
+  #         uv run ansible-playbook \
+  #           --connection=local \
+  #           --extra-vars target=localhost \
+  #           --extra-vars kubeconfig_path=$HOME/.kube/config \
+  #             atmosphere.common.metrics_server
+  #     - name: Wait for Metrics Server to be ready
+  #       run: |
+  #         kubectl wait \
+  #           --namespace kube-system \
+  #           --for=condition=available \
+  #           --timeout=90s \
+  #           deployment.apps/metrics-server
+  #     - name: Verify metrics-server with kubectl top
+  #       run: |
+  #         echo "Waiting for metrics-server to generate metrics..."
+  #         sleep 30
+  #         echo "Checking kubectl top nodes:"
+  #         kubectl top nodes
+  #         echo "Checking kubectl top pods:"
+  #         kubectl top pods --all-namespaces

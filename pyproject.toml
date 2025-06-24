@@ -4,5 +4,10 @@ version = "0.5.0"
 dependencies = [
     "ansible-core>=2.18.4",
     "docker-image-py>=0.1.13",
-    "kubernetes>=32.0.1",
+    "kubernetes>=33.1.0",
+]
+
+[dependency-groups]
+dev = [
+    "molecule>=25.5.0",
 ]

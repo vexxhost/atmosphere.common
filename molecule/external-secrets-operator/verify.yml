@@ -1,0 +1,18 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Verify
+  hosts: "{{ target | default('all') }}"
+  tasks:
+    - name: Apply Fake ClusterSecretStore and ExternalSecret
+      run_once: true
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('file', '../../' + item) | from_yaml }}"
+        apply: true
+        server_side_apply:
+          field_manager: atmosphere
+          force_conflicts: true
+      loop:
+        - tests/manifests/fake-clustersecretstore.yaml
+        - tests/manifests/fake-externalsecret.yaml

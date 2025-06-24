@@ -1,0 +1,31 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+dependency:
+  name: galaxy
+driver:
+  name: default
+  options:
+    managed: false
+    ansible_connection_options:
+      ansible_connection: local
+platforms:
+  - name: instance
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      callbacks_enabled: ansible.posix.profile_tasks
+  inventory:
+    hosts:
+      all:
+        hosts:
+          instance:
+            ansible_host: localhost
+    host_vars:
+      instance:
+        target: "localhost"
+        kubeconfig_path: "$HOME/.kube/config"
+        ansible_python_interpreter: ${ANSIBLE_PYTHON_INTERPRETER_OVERRIDE:-"/usr/bin/python3"}
+verifier:
+  name: ansible
