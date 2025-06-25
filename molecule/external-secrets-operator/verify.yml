@@ -16,3 +16,15 @@
       loop:
         - tests/manifests/fake-clustersecretstore.yaml
         - tests/manifests/fake-externalsecret.yaml
+
+    - name: Wait for test-secret content to be 'bar'
+      run_once: true  # noqa: run-once[task]
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Secret
+        name: test-secret
+        namespace: external-secrets
+      register: secret_info
+      until: (secret_info.resources[0].data.foo | b64decode) == 'bar'
+      retries: 10
+      delay: 5
