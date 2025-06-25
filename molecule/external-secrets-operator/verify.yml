@@ -5,7 +5,7 @@
   hosts: "{{ target | default('all') }}"
   tasks:
     - name: Apply Fake ClusterSecretStore and ExternalSecret
-      run_once: true
+      run_once: true  # noqa: run-once[task]
       kubernetes.core.k8s:
         state: present
         definition: "{{ lookup('file', '../../' + item) | from_yaml }}"
