@@ -7,7 +7,6 @@ _external_secrets_operator_helm_values:
   image:
     repository: "{{ external_secrets_operator_image | atmosphere.common.docker_image('name') }}"
     tag: "{{ external_secrets_operator_image | atmosphere.common.docker_image('tag') }}"
-  installCRDs: true
   leaderElect: true
   certController:
     create: false
