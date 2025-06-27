@@ -8,14 +8,14 @@
       run_once: true  # noqa: run-once[task]
       kubernetes.core.k8s:
         state: present
-        definition: "{{ lookup('file', '../../' + item) | from_yaml }}"
+        definition: "{{ lookup('file', lookup('env', 'MOLECULE_SCENARIO_DIRECTORY') + '/manifests/' + item) | from_yaml }}"
         apply: true
         server_side_apply:
           field_manager: atmosphere
           force_conflicts: true
       loop:
-        - tests/manifests/fake-clustersecretstore.yaml
-        - tests/manifests/fake-externalsecret.yaml
+        - fake-clustersecretstore.yaml
+        - fake-externalsecret.yaml
 
     - name: Wait for test-secret content to be 'bar'
       run_once: true  # noqa: run-once[task]
