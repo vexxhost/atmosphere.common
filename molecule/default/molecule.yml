@@ -21,7 +21,7 @@ provisioner:
   inventory:
     host_vars:
       instance:
-        kubeconfig_path: "$HOME/.kube/config"
+        kubeconfig_path: ${KUBECONFIG}
         ansible_python_interpreter: ${ANSIBLE_PYTHON_INTERPRETER_OVERRIDE:-"/usr/bin/python3"}
 verifier:
   name: ansible
