@@ -1,0 +1,30 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Verify
+  hosts: "{{ target | default('all') }}"
+  tasks:
+    - name: Apply Fake ClusterSecretStore and ExternalSecret
+      run_once: true  # noqa: run-once[task]
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('file', lookup('env', 'MOLECULE_SCENARIO_DIRECTORY') + '/manifests/' + item) | from_yaml }}"
+        apply: true
+        server_side_apply:
+          field_manager: atmosphere
+          force_conflicts: true
+      loop:
+        - fake-clustersecretstore.yaml
+        - fake-externalsecret.yaml
+
+    - name: Wait for test-secret content to be 'bar'
+      run_once: true  # noqa: run-once[task]
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Secret
+        name: test-secret
+        namespace: external-secrets
+      register: secret_info
+      until: (secret_info.resources[0].data.foo | b64decode) == 'bar'
+      retries: 10
+      delay: 5
