@@ -1,0 +1,14 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Prepare
+  hosts: "{{ target | default('all') }}"
+  tasks:
+    - name: Install PIP
+      ansible.builtin.package:
+        name:
+          - python3-pip
+
+    - name: Install Kubernetes python package
+      ansible.builtin.pip:
+        name: kubernetes

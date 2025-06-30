@@ -71,11 +71,9 @@ jobs:
           sudo helm plugin install https://github.com/databus23/helm-diff
       - uses: vexxhost/molecule-action@main
         env:
-          ANSIBLE_PYTHON_INTERPRETER_OVERRIDE: ${{ github.workspace }}/.venv/bin/python
           KUBECONFIG: /root/.kube/config
         with:
           scenario: ${{ matrix.scenario }}
-          preserve-env: ANSIBLE_PYTHON_INTERPRETER_OVERRIDE,KUBECONFIG
 
   metal3:
     runs-on: ubuntu-latest
