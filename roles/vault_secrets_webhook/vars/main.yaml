@@ -2,7 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 _vault_secrets_webhook_helm_values:
-  replicaCount: 1
+  certificate:
+    useCertManager: true
+    generate: false
   image:
     repository: "{{ vault_secrets_webhook_image | atmosphere.common.docker_image('name') }}"
     tag: "{{ vault_secrets_webhook_image | atmosphere.common.docker_image('tag') }}"

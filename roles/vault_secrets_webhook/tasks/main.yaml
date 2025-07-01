@@ -11,3 +11,18 @@
     create_namespace: true
     kubeconfig: "{{ vault_secrets_webhook_helm_kubeconfig }}"
     values: "{{ _vault_secrets_webhook_helm_values | combine(vault_secrets_webhook_helm_values, recursive=True) }}"
+
+- name: Wait for 'vault-secrets-webhook' deployment to be available
+  run_once: true
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: Deployment
+    name: "{{ vault_secrets_webhook_helm_release_name }}"
+    namespace: "{{ vault_secrets_webhook_helm_release_namespace }}"
+    kubeconfig: "{{ vault_secrets_webhook_helm_kubeconfig }}"
+    wait_sleep: 5
+    wait_timeout: 90
+    wait: true
+    wait_condition:
+      type: Available
+      status: true

@@ -29,6 +29,21 @@
     kubeconfig: "{{ vault_operator_helm_kubeconfig }}"
     values: "{{ _vault_operator_helm_values | combine(vault_operator_helm_values, recursive=True) }}"
 
+- name: Wait for 'vault-operator' deployment to be available
+  run_once: true
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: Deployment
+    name: "{{ vault_operator_helm_release_name }}"
+    namespace: "{{ vault_operator_helm_release_namespace }}"
+    kubeconfig: "{{ vault_operator_helm_kubeconfig }}"
+    wait_sleep: 5
+    wait_timeout: 90
+    wait: true
+    wait_condition:
+      type: Available
+      status: true
+
 - name: Apply RBAC manifests for Vault Operator
   run_once: true
   kubernetes.core.k8s:

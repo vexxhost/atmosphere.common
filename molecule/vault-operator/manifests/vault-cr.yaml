@@ -13,7 +13,6 @@ spec:
   size: 1
   image: hashicorp/vault:1.19.5
   serviceAccount: vault
-  serviceType: ClusterIP
   volumeClaimTemplates:
     - metadata:
         name: vault-raft
@@ -49,7 +48,7 @@ spec:
         address: 0.0.0.0:8200
         tls_cert_file: /vault/tls/server.crt
         tls_key_file: /vault/tls/server.key
-    api_addr: https://vault.vault:8200
+    api_addr: https://vault.vault-operator-system:8200
     cluster_addr: "https://${.Env.POD_NAME}:8201"
     disable_mlock: true
     ui: true
@@ -60,4 +59,33 @@ spec:
       unauthenticated_metrics_access: true
   statsdDisabled: true
   serviceRegistrationEnabled: true
-  externalConfig: {}
+  externalConfig:
+    purgeUnmanagedConfig:
+      enabled: true
+    auth:
+      - type: kubernetes
+        path: kubernetes/molecule
+        description: Kubernetes authentication method
+        config:
+          kubernetes_host: https://kubernetes.default.svc
+        roles:
+          - name: external-secrets-cluster-secret-store
+            bound_service_account_names: ["external-secrets"]
+            bound_service_account_namespaces: ["external-secrets"]
+            policies: ["read_only_kv_all"]
+            ttl: 1h
+          - name: vault
+            bound_service_account_names: ["*"]
+            bound_service_account_namespaces: ["default", "vault-operator-system"]
+            policies: ["read_only_kv_all"]
+            ttl: 1h
+    policies:
+      - name: read_only_kv_all
+        rules: |
+          path "secret/test/data/*" {
+            capabilities = ["read"]
+          }
+    secrets:
+      - type: kv-v2
+        path: secret/test
+        description: Test secrets
