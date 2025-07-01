@@ -61,9 +61,9 @@
       ansible.builtin.set_fact:
         vault_root_token: "{{ vault_keys.resources[0].data['vault-root'] | b64decode }}"
 
-    - name: Write vault kv2 secrets
-      run_once: true # noqa: run-once[task]
-      community.hashi_vault.vault_kv2_write:  # noqa: name[prefix] no-module-collection[community.hashi_vault.vault_kv2_write]
+    - name: Write vault kv2 secrets  # noqa syntax-check[unknown-module]
+      run_once: true  # noqa: run-once[task]
+      community.hashi_vault.vault_kv2_write:
         url: https://127.0.0.1:8200
         validate_certs: false
         token: "{{ vault_root_token }}"
