@@ -63,7 +63,7 @@
 
     - name: Write vault kv2 secrets
       run_once: true # noqa: run-once[task]
-      community.hashi_vault.vault_kv2_write:
+      community.hashi_vault.vault_kv2_write:  # noqa: name[prefix] no-module-collection[community.hashi_vault.vault_kv2_write]
         url: https://127.0.0.1:8200
         validate_certs: false
         token: "{{ vault_root_token }}"
