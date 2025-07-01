@@ -64,6 +64,8 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
+        with:
+          config: .github/kind-config.yaml
       # NOTE(fitbeard): we run Molecule with sudo (as root)
       # and helm-diff for better Molecule's idempotence checks
       - name: Setup dependencies
