@@ -1,0 +1,15 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+_vault_secrets_webhook_helm_values:
+  certificate:
+    useCertManager: true
+    generate: false
+  image:
+    repository: "{{ vault_secrets_webhook_image | atmosphere.common.docker_image('name') }}"
+    tag: "{{ vault_secrets_webhook_image | atmosphere.common.docker_image('tag') }}"
+  vaultEnv:
+    repository: "{{ vault_secrets_webhook_vault_env_image | atmosphere.common.docker_image('name') }}"
+    tag: "{{ vault_secrets_webhook_vault_env_image | atmosphere.common.docker_image('tag') }}"
+  secretsFailurePolicy: Fail
+  nodeSelector: "{{ vault_secrets_webhook_node_selector }}"
