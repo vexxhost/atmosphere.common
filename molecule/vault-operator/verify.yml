@@ -33,7 +33,7 @@
           type: Healthy
           status: true
 
-    - name: Wait for clustersecretstores 'molecule' to be available
+    - name: Wait for clustersecretstore 'molecule' to be available
       run_once: true # noqa: run-once[task]
       kubernetes.core.k8s_info:
         api_version: external-secrets.io/v1

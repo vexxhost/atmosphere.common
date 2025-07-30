@@ -1,18 +1,12 @@
 # Copyright (c) 2025 VEXXHOST, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-- name: Slurp remote CRD file
-  run_once: true
-  ansible.builtin.slurp:
-    src: "{{ vault_operator_crds_download_dest }}"
-  register: crd_content
-
 - name: Install CRDs
   run_once: true
   changed_when: false
   kubernetes.core.k8s:
     state: present
-    definition: "{{ crd_content['content'] | b64decode | from_yaml_all }}"
+    definition: "{{ lookup('pipe', 'cat ' + role_path + '/files/' + (vault_operator_image | atmosphere.common.docker_image('tag')) + '/*.yaml') | regex_replace('- =$', '- \"=\"', multiline=True) | from_yaml_all }}" # noqa: yaml[line-length]
     apply: true
     server_side_apply:
       field_manager: atmosphere

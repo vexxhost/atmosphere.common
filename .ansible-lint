@@ -1,3 +1,4 @@
 ---
 exclude_paths:
   - molecule/default/requirements-dev.yaml
+  - roles/vault_operator/files
