@@ -3,5 +3,7 @@
 
 collections:
   - name: ansible.posix
+  - name: community.hashi_vault
+    version: ">=6.2.0"
   - name: kubernetes.core
     version: ">=2.4.0"

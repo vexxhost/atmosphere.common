@@ -1,0 +1,124 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Install CRDs
+  run_once: true
+  changed_when: false
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('pipe', 'cat ' + role_path + '/files/' + (vault_operator_image | atmosphere.common.docker_image('tag')) + '/*.yaml') | regex_replace('- =$', '- \"=\"', multiline=True) | from_yaml_all }}" # noqa: yaml[line-length]
+    apply: true
+    server_side_apply:
+      field_manager: atmosphere
+      force_conflicts: true
+
+- name: Deploy Helm chart
+  run_once: true
+  kubernetes.core.helm:
+    name: "{{ vault_operator_helm_release_name }}"
+    chart_ref: "{{ vault_operator_helm_chart_ref }}"
+    chart_version: "{{ vault_operator_helm_chart_version }}"
+    release_namespace: "{{ vault_operator_helm_release_namespace }}"
+    create_namespace: true
+    kubeconfig: "{{ vault_operator_helm_kubeconfig }}"
+    values: "{{ _vault_operator_helm_values | combine(vault_operator_helm_values, recursive=True) }}"
+
+- name: Wait for 'vault-operator' deployment to be available
+  run_once: true
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: Deployment
+    name: "{{ vault_operator_helm_release_name }}"
+    namespace: "{{ vault_operator_helm_release_namespace }}"
+    kubeconfig: "{{ vault_operator_helm_kubeconfig }}"
+    wait_sleep: 5
+    wait_timeout: 90
+    wait: true
+    wait_condition:
+      type: Available
+      status: true
+
+- name: Apply RBAC manifests for Vault Operator
+  run_once: true
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      - apiVersion: v1
+        kind: ServiceAccount
+        metadata:
+          name: vault
+          namespace: "{{ vault_operator_helm_release_namespace }}"
+
+      - apiVersion: rbac.authorization.k8s.io/v1
+        kind: Role
+        metadata:
+          name: vault
+          namespace: "{{ vault_operator_helm_release_namespace }}"
+        rules:
+          - apiGroups: [""]
+            resources: ["pods"]
+            verbs: ["get", "patch", "update"]
+          - apiGroups: [""]
+            resources: ["secrets"]
+            verbs: ["*"]
+
+      - apiVersion: rbac.authorization.k8s.io/v1
+        kind: RoleBinding
+        metadata:
+          name: vault
+          namespace: "{{ vault_operator_helm_release_namespace }}"
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: Role
+          name: vault
+        subjects:
+          - kind: ServiceAccount
+            name: vault
+            namespace: "{{ vault_operator_helm_release_namespace }}"
+
+      - apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRoleBinding
+        metadata:
+          name: vault-auth-delegator
+          namespace: "{{ vault_operator_helm_release_namespace }}"
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: system:auth-delegator
+        subjects:
+          - kind: ServiceAccount
+            name: vault
+            namespace: "{{ vault_operator_helm_release_namespace }}"
+
+      - apiVersion: rbac.authorization.k8s.io/v1
+        kind: Role
+        metadata:
+          name: leader-election-role
+          namespace: "{{ vault_operator_helm_release_namespace }}"
+        rules:
+          - apiGroups: [""]
+            resources: ["configmaps"]
+            verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+          - apiGroups: ["coordination.k8s.io"]
+            resources: ["leases"]
+            verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+          - apiGroups: [""]
+            resources: ["events"]
+            verbs: ["create", "patch"]
+          - apiGroups: ["authentication.k8s.io"]
+            resources: ["tokenreviews"]
+            verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+      - apiVersion: rbac.authorization.k8s.io/v1
+        kind: RoleBinding
+        metadata:
+          name: leader-election-rolebinding
+          namespace: "{{ vault_operator_helm_release_namespace }}"
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: Role
+          name: leader-election-role
+        subjects:
+          - kind: ServiceAccount
+            name: vault
+            namespace: "{{ vault_operator_helm_release_namespace }}"
