@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Version of Ironic Standalone Operator to install
-baremetal_operator_version: 0.10.2
+baremetal_operator_version: 0.10.3
 
 # Git repository location for Baremetal Operator
 baremetal_operator_git_url: https://github.com/metal3-io/baremetal-operator
