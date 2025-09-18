@@ -1,0 +1,14 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Install Cert Manager
+  ansible.builtin.import_playbook: atmosphere.common.cert_manager
+
+- name: Install Vault Operator
+  ansible.builtin.import_playbook: atmosphere.common.vault_operator
+
+- name: Install Vault Secrets Webhook
+  ansible.builtin.import_playbook: atmosphere.common.vault_secrets_webhook
+
+- name: Install External Secrets Operator
+  ansible.builtin.import_playbook: atmosphere.common.external_secrets_operator
