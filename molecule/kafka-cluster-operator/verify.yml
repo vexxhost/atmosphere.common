@@ -1,0 +1,32 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Verify
+  hosts: "{{ target | default('all') }}"
+  tasks:
+    - name: Create a Kafka cluster
+      run_once: true  # noqa: run-once[task]
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('file', lookup('env', 'MOLECULE_SCENARIO_DIRECTORY') + '/manifests/' + item) | from_yaml }}"
+        apply: true
+        server_side_apply:
+          field_manager: atmosphere
+          force_conflicts: true
+      loop:
+        - node_pool.yaml
+        - cluster.yaml
+
+    - name: Wait for Kafka cluster to be ready
+      run_once: true  # noqa: run-once[task]
+      kubernetes.core.k8s_info:
+        api_version: kafka.strimzi.io/v1beta2
+        kind: Kafka
+        name: kafka-cluster
+        namespace: openstack
+        wait_sleep: 1
+        wait_timeout: 600
+        wait: true
+        wait_condition:
+          type: Ready
+          status: true
