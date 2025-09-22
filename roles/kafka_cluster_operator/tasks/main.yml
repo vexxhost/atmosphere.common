@@ -12,19 +12,17 @@
     kubeconfig: "{{ kafka_cluster_operator_helm_kubeconfig }}"
     values: "{{ _kafka_cluster_operator_helm_values | combine(kafka_cluster_operator_helm_values, recursive=True) }}"
 
-- name: Wait for operator deployments to be available
+- name: Wait for operator deployment to be available
   run_once: true
   kubernetes.core.k8s_info:
     api_version: apps/v1
     kind: Deployment
-    name: "{{ item }}"
+    name: strimzi-cluster-Operator
     namespace: "{{ kafka_cluster_operator_helm_release_namespace }}"
     kubeconfig: "{{ kafka_cluster_operator_helm_kubeconfig }}"
-    wait_sleep: 5
+    wait_sleep: 1
     wait_timeout: 90
     wait: true
     wait_condition:
       type: Available
       status: true
-  loop:
-    - strimzi-cluster-Operator
