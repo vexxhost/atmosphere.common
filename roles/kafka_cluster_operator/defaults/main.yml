@@ -1,0 +1,16 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+kafka_cluster_operator_helm_repository_url: oci://quay.io/strimzi-helm
+kafka_cluster_operator_helm_chart_name: strimzi-kafka-operator
+kafka_cluster_operator_helm_chart_ref: "{{ kafka_cluster_operator_helm_repository_url }}/{{ kafka_cluster_operator_helm_chart_name }}"
+kafka_cluster_operator_helm_chart_version: 0.47.0
+
+kafka_cluster_operator_helm_release_namespace: openstack
+kafka_cluster_operator_helm_release_name: strimzi-kafka-operator
+kafka_cluster_operator_helm_kubeconfig: "{{ kubeconfig_path | default('/etc/kubernetes/admin.conf') }}"
+
+kafka_cluster_operator_helm_values: {}
+kafka_cluster_operator_node_selector: {}
+
+kafka_cluster_operator_image: "quay.io/strimzi/operator:{{ kafka_cluster_operator_helm_chart_version }}"
