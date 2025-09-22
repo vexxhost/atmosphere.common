@@ -27,5 +27,4 @@
       type: Available
       status: true
   loop:
-    - strimzi-cluster-operator
-    - kafka-cluster-entity-operator
+    - strimzi-cluster-Operator
