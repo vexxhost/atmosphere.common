@@ -1,0 +1,31 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Deploy Helm chart
+  run_once: true
+  kubernetes.core.helm:
+    name: "{{ kafka_cluster_operator_helm_release_name }}"
+    chart_ref: "{{ kafka_cluster_operator_helm_chart_ref }}"
+    chart_version: "{{ kafka_cluster_operator_helm_chart_version }}"
+    release_namespace: "{{ kafka_cluster_operator_helm_release_namespace }}"
+    create_namespace: true
+    kubeconfig: "{{ kafka_cluster_operator_helm_kubeconfig }}"
+    values: "{{ _kafka_cluster_operator_helm_values | combine(kafka_cluster_operator_helm_values, recursive=True) }}"
+
+- name: Wait for operator deployments to be available
+  run_once: true
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: Deployment
+    name: "{{ item }}"
+    namespace: "{{ kafka_cluster_operator_helm_release_namespace }}"
+    kubeconfig: "{{ kafka_cluster_operator_helm_kubeconfig }}"
+    wait_sleep: 5
+    wait_timeout: 90
+    wait: true
+    wait_condition:
+      type: Available
+      status: true
+  loop:
+    - strimzi-cluster-operator
+    - kafka-cluster-entity-operator

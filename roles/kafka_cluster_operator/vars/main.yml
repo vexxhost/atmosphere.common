@@ -1,0 +1,19 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+_kafka_cluster_operator_helm_values:
+  image:
+    registry: "{{ kafka_cluster_operator_image | atmosphere.common.docker_image('name') }}"
+    repository: "{{ (kafka_cluster_operator_image | atmosphere.common.docker_image('path')).split('/')[0] }}"
+    tag: "{{ kafka_cluster_operator_image | atmosphere.common.docker_image('tag') }}"
+  nodeSelector: "{{ kafka_cluster_operator_node_selector }}"
+  topicOperator:
+    image:
+      registry: "{{ kafka_cluster_operator_image | atmosphere.common.docker_image('name') }}"
+      repository: "{{ (kafka_cluster_operator_image | atmosphere.common.docker_image('path')).split('/')[0] }}"
+      tag: "{{ kafka_cluster_operator_image | atmosphere.common.docker_image('name') }}"
+  userOperator:
+    image:
+      registry: "{{ kafka_cluster_operator_image | atmosphere.common.docker_image('name') }}"
+      repository: "{{ (kafka_cluster_operator_image | atmosphere.common.docker_image('path')).split('/')[0] }}"
+      tag: "{{ kafka_cluster_operator_image | atmosphere.common.docker_image('name') }}"
