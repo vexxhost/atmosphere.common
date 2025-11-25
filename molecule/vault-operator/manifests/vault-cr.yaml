@@ -1,0 +1,96 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+---
+apiVersion: vault.banzaicloud.com/v1alpha1
+kind: Vault
+metadata:
+  name: vault-test
+  namespace: vault-operator-system
+  labels:
+    app.kubernetes.io/name: vault-test
+    vault_cr: vault-test
+spec:
+  size: 1
+  image: hashicorp/vault:1.20.1
+  serviceAccount: vault
+  volumeClaimTemplates:
+    - metadata:
+        name: vault-raft
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+  volumes:
+    - name: vault-raft
+      persistentVolumeClaim:
+        claimName: vault-raft
+  volumeMounts:
+    - name: vault-raft
+      mountPath: /vault/data
+  caNamespaces:
+    - "*"
+  unsealConfig:
+    options:
+      preFlightChecks: true
+      storeRootToken: true
+      secretShares: 5
+      secretThreshold: 3
+    kubernetes:
+      secretNamespace: vault-operator-system
+  config:
+    storage:
+      raft:
+        path: /vault/data
+    listener:
+      tcp:
+        address: 0.0.0.0:8200
+        tls_cert_file: /vault/tls/server.crt
+        tls_key_file: /vault/tls/server.key
+    api_addr: https://vault.vault-operator-system:8200
+    cluster_addr: "https://${.Env.POD_NAME}:8201"
+    disable_mlock: true
+    ui: true
+    plugin_directory: /vault/plugins
+    service_registration:
+      kubernetes: {}
+    telemetry:
+      unauthenticated_metrics_access: true
+  statsdDisabled: true
+  serviceRegistrationEnabled: true
+  externalConfig:
+    purgeUnmanagedConfig:
+      enabled: true
+    auth:
+      - type: kubernetes
+        path: kubernetes/molecule
+        description: Kubernetes authentication method
+        config:
+          kubernetes_host: https://kubernetes.default.svc
+        roles:
+          - name: external-secrets-cluster-secret-store
+            bound_service_account_names: ["external-secrets"]
+            bound_service_account_namespaces: ["external-secrets"]
+            policies: ["read_only_kv_all"]
+            # https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/
+            # https://outshift.cisco.com/blog/kubernetes-oidc
+            # https://support.hashicorp.com/hc/en-us/articles/34458984727443-Audience-parameter-usage-with-kube-auth-in-vault-with-caveats
+            audience: https://kubernetes.default.svc.cluster.local
+            ttl: 1h
+          - name: vault
+            bound_service_account_names: ["*"]
+            bound_service_account_namespaces: ["default", "vault-operator-system"]
+            policies: ["read_only_kv_all"]
+            audience: https://kubernetes.default.svc.cluster.local
+            ttl: 1h
+    policies:
+      - name: read_only_kv_all
+        rules: |
+          path "secret/test/data/*" {
+            capabilities = ["read"]
+          }
+    secrets:
+      - type: kv-v2
+        path: secret/test
+        description: Test secrets

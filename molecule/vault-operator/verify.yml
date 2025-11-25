@@ -1,0 +1,122 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Verify
+  hosts: "{{ target | default('all') }}"
+  tasks:
+    - name: Apply test manifests
+      run_once: true  # noqa: run-once[task]
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('file', lookup('env', 'MOLECULE_SCENARIO_DIRECTORY') + '/manifests/' + item) | from_yaml }}"
+        apply: true
+        server_side_apply:
+          field_manager: atmosphere
+          force_conflicts: true
+      loop:
+        - vault-cr.yaml
+        - vault-cr-static-nodeport.yaml
+        - clustersecretstore.yaml
+        - externalsecret.yaml
+
+    - name: Wait for vault 'vault-test' to be available
+      run_once: true # noqa: run-once[task]
+      kubernetes.core.k8s_info:
+        api_version: vault.banzaicloud.com/v1alpha1
+        kind: Vault
+        name: vault-test
+        namespace: vault-operator-system
+        wait_sleep: 5
+        wait_timeout: 180
+        wait: true
+        wait_condition:
+          type: Healthy
+          status: true
+
+    - name: Wait for clustersecretstore 'molecule' to be available
+      run_once: true # noqa: run-once[task]
+      kubernetes.core.k8s_info:
+        api_version: external-secrets.io/v1
+        kind: ClusterSecretStore
+        name: molecule
+        namespace: external-secrets
+        wait_sleep: 5
+        wait_timeout: 90
+        wait: true
+        wait_condition:
+          type: Ready
+          status: true
+
+    - name: Get vault keys
+      run_once: true  # noqa: run-once[task]
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Secret
+        name: vault-test-unseal-keys
+        namespace: vault-operator-system
+      register: vault_keys
+
+    - name: Get vault root token
+      run_once: true  # noqa: run-once[task]
+      ansible.builtin.set_fact:
+        vault_root_token: "{{ vault_keys.resources[0].data['vault-root'] | b64decode }}"
+
+    - name: Write vault kv2 secrets  # noqa syntax-check[unknown-module]
+      run_once: true  # noqa: run-once[task]
+      community.hashi_vault.vault_kv2_write:
+        url: https://127.0.0.1:8200
+        validate_certs: false
+        token: "{{ vault_root_token }}"
+        read_before_write: true
+        engine_mount_point: secret/test
+        path: molecule
+        data:
+          foo: bar
+          simple: secret
+          record: asdcascascascsaAAAAaasassassasasaasa
+
+    - name: Create 'molecule-mutated-secret' secret
+      run_once: true  # noqa: run-once[task]
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: molecule-mutated-secret
+            namespace: default
+            annotations:
+              vault.security.banzaicloud.io/vault-addr: https://vault-test.vault-operator-system:8200
+              vault.security.banzaicloud.io/vault-role: vault
+              vault.security.banzaicloud.io/vault-tls-secret: vault-test-tls
+              vault.security.banzaicloud.io/vault-path: kubernetes/molecule
+          stringData:
+            template: "Secret data ${vault:secret/test/data/molecule#record} and ${vault:secret/test/data/molecule#foo} and ${vault:secret/test/data/molecule#simple}" # noqa: yaml[line-length]
+
+    - name: Wait for 'molecule-secret' content
+      run_once: true  # noqa: run-once[task]
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Secret
+        name: molecule-secret
+        namespace: default
+      register: secret_info
+      until: >
+        secret_info.resources[0].data.foo is defined and
+        (secret_info.resources[0].data.foo | b64decode) == 'bar'
+      retries: 15
+      delay: 5
+
+    - name: Wait for 'molecule-mutated-secret' content
+      run_once: true  # noqa: run-once[task]
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Secret
+        name: molecule-mutated-secret
+        namespace: default
+      register: secret_info
+      until: >
+        secret_info.resources[0].data.template is defined and
+        (secret_info.resources[0].data.template | b64decode) == 'Secret data asdcascascascsaAAAAaasassassasasaasa and bar and secret'
+      retries: 10
+      delay: 5

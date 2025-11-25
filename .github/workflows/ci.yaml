@@ -60,9 +60,12 @@ jobs:
       matrix:
         scenario:
           - external-secrets-operator
+          - vault-operator
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
+        with:
+          config: .github/kind-config.yaml
       # NOTE(fitbeard): we run Molecule with sudo (as root)
       # and helm-diff for better Molecule's idempotence checks
       - name: Setup dependencies

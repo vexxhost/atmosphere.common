@@ -9,5 +9,6 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "hvac>=2.3.0",
     "molecule>=25.5.0",
 ]

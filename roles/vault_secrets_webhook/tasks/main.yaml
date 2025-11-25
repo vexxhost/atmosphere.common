@@ -1,0 +1,28 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Deploy Helm chart
+  run_once: true
+  kubernetes.core.helm:
+    name: "{{ vault_secrets_webhook_helm_release_name }}"
+    chart_ref: "{{ vault_secrets_webhook_helm_chart_ref }}"
+    chart_version: "{{ vault_secrets_webhook_helm_chart_version }}"
+    release_namespace: "{{ vault_secrets_webhook_helm_release_namespace }}"
+    create_namespace: true
+    kubeconfig: "{{ vault_secrets_webhook_helm_kubeconfig }}"
+    values: "{{ _vault_secrets_webhook_helm_values | combine(vault_secrets_webhook_helm_values, recursive=True) }}"
+
+- name: Wait for 'vault-secrets-webhook' deployment to be available
+  run_once: true
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: Deployment
+    name: "{{ vault_secrets_webhook_helm_release_name }}"
+    namespace: "{{ vault_secrets_webhook_helm_release_namespace }}"
+    kubeconfig: "{{ vault_secrets_webhook_helm_kubeconfig }}"
+    wait_sleep: 5
+    wait_timeout: 90
+    wait: true
+    wait_condition:
+      type: Available
+      status: true
