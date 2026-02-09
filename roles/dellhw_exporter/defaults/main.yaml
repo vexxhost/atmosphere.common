@@ -3,7 +3,7 @@
 
 dellhw_exporter_helm_repository_url: https://galexrt.github.io/dellhw_exporter
 dellhw_exporter_helm_chart_name: prometheus-dellhw-exporter
-dellhw_exporter_helm_chart_version: 1.0.3
+dellhw_exporter_helm_chart_version: 1.2.2
 
 dellhw_exporter_helm_release_namespace: monitoring
 dellhw_exporter_helm_release_name: prometheus-dellhw-exporter
