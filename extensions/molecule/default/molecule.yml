@@ -4,7 +4,7 @@
 dependency:
   name: galaxy
   options:
-    requirements-file: molecule/default/requirements-dev.yaml
+    requirements-file: extensions/molecule/default/requirements-dev.yaml
 driver:
   name: default
   options:
