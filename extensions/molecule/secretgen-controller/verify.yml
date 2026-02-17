@@ -1,0 +1,45 @@
+# Copyright (c) 2026 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Verify
+  hosts: all
+  become: true
+  tasks:
+    - name: Wait for secretgen-controller deployment to be available
+      run_once: true # noqa: run-once[task]
+      kubernetes.core.k8s_info:
+        api_version: apps/v1
+        kind: Deployment
+        name: secretgen-controller
+        namespace: secretgen-controller
+      register: _secretgen_controller_deployment
+      until:
+        - _secretgen_controller_deployment.resources | length > 0
+        - _secretgen_controller_deployment.resources[0].status.availableReplicas | default(0) > 0
+      retries: 30
+      delay: 10
+
+    - name: Create a test Password resource
+      run_once: true # noqa: run-once[task]
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: secretgen.k14s.io/v1alpha1
+          kind: Password
+          metadata:
+            name: test-password
+            namespace: default
+
+    - name: Wait for test-password secret to be generated
+      run_once: true # noqa: run-once[task]
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Secret
+        name: test-password
+        namespace: default
+      register: _test_password_secret
+      until:
+        - _test_password_secret.resources | length > 0
+        - _test_password_secret.resources[0].data.password is defined
+      retries: 15
+      delay: 5
