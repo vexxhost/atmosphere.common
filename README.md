@@ -23,7 +23,7 @@ x-release-please-start-version
 ```yaml
 dependencies:
   - name: atmosphere.common
-    version: 0.5.0
+    version: 0.6.0
 ```
 
 <!--

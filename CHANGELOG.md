@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.0](https://github.com/vexxhost/atmosphere.common/compare/v0.5.0...v0.6.0) (2026-02-17)
+
+
+### Features
+
+* add external-secrets ([#75](https://github.com/vexxhost/atmosphere.common/issues/75)) ([0d97a66](https://github.com/vexxhost/atmosphere.common/commit/0d97a666e7d642ebfb2987f7842b6f50a0721092))
+* add secretgen_controller role ([#108](https://github.com/vexxhost/atmosphere.common/issues/108)) ([e438220](https://github.com/vexxhost/atmosphere.common/commit/e43822059c5600b9e3311e8566f05b28d9d7f33e))
+
+
+### Bug Fixes
+
+* correct helm chart version format and update image reference ([145d75d](https://github.com/vexxhost/atmosphere.common/commit/145d75d54ab77d0fee206849e898d725d15feb96))
+* use full path for flux cli ([c0624a0](https://github.com/vexxhost/atmosphere.common/commit/c0624a0c26348e1acd7e5fe58c03c347296b5c25))
+
 ## [0.5.0](https://github.com/vexxhost/atmosphere.common/compare/v0.4.0...v0.5.0) (2025-06-09)
 
 
