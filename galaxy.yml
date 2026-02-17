@@ -9,6 +9,8 @@ license:
   - Apache-2.0
 dependencies:
   kubernetes.core: '>=2.4.0'
+  community.general: '>=7.3.0'
+  vexxhost.kubernetes: '>=2.5.1'
 tags:
   - application
   - cloud

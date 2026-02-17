@@ -1,0 +1,13 @@
+# Copyright (c) 2026 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Prepare
+  hosts: all
+  become: true
+  tasks:
+    - name: Install Debian packages
+      ansible.builtin.apt:
+        name: ["gnupg"]
+        update_cache: true
+
+- import_playbook: vexxhost.kubernetes.site
