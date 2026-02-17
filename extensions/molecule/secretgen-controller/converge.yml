@@ -1,0 +1,8 @@
+# Copyright (c) 2026 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Converge
+  hosts: all
+  become: true
+  roles:
+    - atmosphere.common.secretgen_controller
