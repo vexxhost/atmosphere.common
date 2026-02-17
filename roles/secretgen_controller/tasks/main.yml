@@ -1,0 +1,7 @@
+# Copyright (c) 2022 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Deploy secretgen-controller
+  kubernetes.core.k8s:
+    state: present
+    template: release.yml.tpl

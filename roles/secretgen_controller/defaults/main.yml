@@ -1,0 +1,4 @@
+# Copyright (c) 2026 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+secretgen_controller_image: ghcr.io/carvel-dev/secretgen-controller@sha256:59ec05ce5847bfd70c8e04f08b5195e918c8f6fbb947ffc91b456494a2958fd5

@@ -8,7 +8,5 @@ _download_artifact_goarch_groups:
 
 download_artifact_goarch: >-
   {%- if ansible_facts['architecture'] in _download_artifact_goarch_groups -%}
-  {{ _download_artifact_goarch_groups[ansible_facts['architecture']] }}
-  {%- else -%}
-  {{ ansible_facts['architecture'] }}
-  {%- endif -%}
+  {{ _download_artifact_goarch_groups[ansible_facts['architecture']] }}{%- else -%}
+  {{ ansible_facts['architecture'] }}{%- endif -%}

@@ -1,0 +1,42 @@
+# Copyright (c) 2026 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- job:
+    name: atmosphere-common-molecule
+    parent: molecule
+    abstract: true
+    nodeset:
+      nodes:
+        - name: controller
+          label: ubuntu-noble
+      groups:
+        - name: controllers
+          nodes:
+            - controller
+    vars:
+      kubernetes_version: 1.28.13
+    group-vars:
+      all:
+        cilium_helm_values:
+          operator:
+            replicas: 1
+      controllers:
+        kube_vip_interface: "{{ ansible_facts['default_ipv4'].interface }}"
+        kube_vip_address: 172.17.0.100
+        kubernetes_hostname: "{{ ansible_facts['default_ipv4'].address }}"
+        cilium_ipv4_cidr: 172.24.0.0/16
+
+- job:
+    name: atmosphere-common-molecule-secretgen-controller
+    parent: atmosphere-common-molecule
+    vars:
+      molecule_scenario: secretgen-controller
+
+- project:
+    merge-mode: squash-merge
+    check:
+      jobs:
+        - atmosphere-common-molecule-secretgen-controller
+    gate:
+      jobs:
+        - atmosphere-common-molecule-secretgen-controller
