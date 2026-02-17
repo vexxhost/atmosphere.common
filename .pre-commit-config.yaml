@@ -1,4 +1,4 @@
-exclude: ^(.github/.*|meta/.*|galaxy.yml|.pre-commit-config.yaml)$
+exclude: ^(.github/.*|meta/.*|galaxy.yml|.pre-commit-config.yaml|roles/kube_prometheus_stack/files/jsonnet/vendor/.*)$
 
 default_install_hook_types:
   - pre-commit

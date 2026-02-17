@@ -1,0 +1,10 @@
+# Copyright (c) 2026 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Deploy "kube-prometheus-stack"
+  hosts: "{{ target | default('all') }}"
+  gather_facts: false
+  roles:
+    - role: atmosphere.common.kube_prometheus_stack
+      tags:
+        - kube-prometheus-stack
