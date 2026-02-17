@@ -5,7 +5,14 @@
     name: atmosphere-common-molecule
     parent: molecule
     abstract: true
-    nodeset: ubuntu-noble
+    nodeset:
+      nodes:
+        - name: controller
+          label: ubuntu-noble
+      groups:
+        - name: controllers
+          nodes:
+            - controller
     vars:
       kubernetes_version: 1.28.13
     group-vars:
