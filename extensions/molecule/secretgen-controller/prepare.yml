@@ -10,4 +10,5 @@
         name: ["gnupg"]
         update_cache: true
 
-- import_playbook: vexxhost.kubernetes.site
+- name: Deploy Kubernetes
+  ansible.builtin.import_playbook: vexxhost.kubernetes.site

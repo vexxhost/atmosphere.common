@@ -24,7 +24,7 @@ repos:
       - id: check-spdx-copyright-text
         name: Check SPDX-FileCopyrightText
         args: [--negate]
-        entry: '^# Copyright \(c\) 2025 VEXXHOST, Inc\.$'
+        entry: '^# Copyright \(c\) \d{4} VEXXHOST, Inc\.$'
         language: pygrep
         files: \.(py|sh|yaml|yml)$
       - id: check-spdx-license-identifier
