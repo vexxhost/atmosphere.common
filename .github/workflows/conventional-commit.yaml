@@ -8,6 +8,8 @@ on:
       - reopened
       - synchronize
 
+permissions: {}
+
 jobs:
   pr-title:
     runs-on: ubuntu-latest
