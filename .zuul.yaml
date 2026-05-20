@@ -13,6 +13,10 @@
         - name: controllers
           nodes:
             - controller
+    pre-run: test-playbooks/molecule/pre.yml
+    post-run: test-playbooks/molecule/post.yml
+    roles:
+      - zuul: opendev.org/openstack/openstack-helm
     vars:
       kubernetes_version: 1.28.13
     group-vars:
@@ -32,11 +36,87 @@
     vars:
       molecule_scenario: secretgen-controller
 
+- job:
+    name: atmosphere-common-molecule-glance-image
+    parent: atmosphere-common-molecule
+    timeout: 7200
+    files:
+      - ^extensions/molecule/glance-image/.*
+      - ^playbooks/glance_image.yaml$
+      - ^roles/glance_image/.*
+    required-projects:
+      - ansible-collections/ansible.netcommon
+      - ansible-collections/ansible.posix
+      - ansible-collections/ansible.utils
+      - ansible-collections/community.crypto
+      - ansible-collections/community.general
+      - ansible-collections/community.mysql
+      - ansible-collections/kubernetes.core
+      - openstack/ansible-collections-openstack
+      - vexxhost/ansible-collection-ceph
+      - vexxhost/ansible-collection-containers
+      - vexxhost/ansible-collection-kubernetes
+      - vexxhost/atmosphere
+    vars:
+      molecule_scenario: glance-image
+      atmosphere_image_prefix: "harbor.atmosphere.dev/"
+      kubernetes_keepalived_interface: "{{ ansible_facts['default_ipv4'].interface }}"
+      kubernetes_keepalived_vrid: 42
+      kubernetes_keepalived_vip: 172.17.0.100
+      csi_driver: local-path-provisioner
+      cluster_issuer_type: self-signed
+      domain_name: "{{ ansible_facts['default_ipv4'].address | replace('.', '-') }}.nip.io"
+      ingress_nginx_helm_values:
+        controller:
+          config:
+            worker-processes: 2
+      percona_xtradb_cluster_spec:
+        allowUnsafeConfigurations: true
+        pxc:
+          size: 1
+        haproxy:
+          size: 1
+      rabbitmq_spec:
+        resources:
+          requests:
+            cpu: 250m
+            memory: 256Mi
+      keycloak_host: "keycloak.{{ domain_name }}"
+      keycloak_database_password: secrete123
+      keycloak_admin_password: secrete123
+      openstack_helm_endpoints_region_name: RegionOne
+      openstack_helm_endpoints_memcached_secret_key: secrete123
+      openstack_helm_endpoints_rabbitmq_admin_password: secrete123
+      openstack_helm_endpoints_keystone_api_host: "identity.{{ domain_name }}"
+      openstack_helm_endpoints_keystone_admin_password: secrete123
+      openstack_helm_endpoints_keystone_mariadb_password: secrete123
+      openstack_helm_endpoints_keystone_rabbitmq_password: secrete123
+      keystone_keycloak_client_secret: secrete123
+      keystone_oidc_crypto_passphrase: secrete123
+      keystone_helm_values:
+        pod:
+          replicas:
+            api: 1
+      openstack_helm_endpoints_horizon_api_host: "dashboard.{{ domain_name }}"
+      openstack_helm_endpoints_horizon_mariadb_password: secrete123
+      openstack_helm_endpoints_glance_api_host: "image.{{ domain_name }}"
+      openstack_helm_endpoints_glance_keystone_password: secrete123
+      openstack_helm_endpoints_glance_mariadb_password: secrete123
+      openstack_helm_endpoints_glance_rabbitmq_password: secrete123
+      glance_images: []
+      glance_helm_values:
+        storage: pvc
+        pod:
+          replicas:
+            api: 1
+
 - project:
     merge-mode: squash-merge
     check:
       jobs:
         - atmosphere-common-molecule-secretgen-controller
+        - atmosphere-common-molecule-glance-image
     gate:
       jobs:
         - atmosphere-common-molecule-secretgen-controller
+        - atmosphere-common-molecule-glance-image
