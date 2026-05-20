@@ -1,0 +1,16 @@
+# Copyright (c) 2026 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Collect Molecule logs
+  hosts: all
+  become: true
+  vars:
+    work_dir: "{{ zuul.project.src_dir }}"
+    logs_dir: "/tmp/logs"
+  roles:
+    - gather-host-logs
+    - helm-release-status
+    - describe-kubernetes-objects
+    - gather-pod-logs
+    - gather-prom-metrics
+    - gather-selenium-data

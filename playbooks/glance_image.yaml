@@ -1,0 +1,10 @@
+# Copyright (c) 2026 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Manage OpenStack Glance image
+  hosts: "{{ target | default('all') }}"
+  become: true
+  roles:
+    - role: atmosphere.common.glance_image
+      tags:
+        - glance-image
