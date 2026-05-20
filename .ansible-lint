@@ -1,3 +1,5 @@
 ---
 exclude_paths:
   - extensions/molecule/default/requirements-dev.yaml
+  - extensions/molecule/glance-image/prepare.yml
+  - test-playbooks/molecule/post.yml

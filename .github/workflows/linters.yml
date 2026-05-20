@@ -3,6 +3,9 @@ name: linters
 on:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   ansible-lint:
     runs-on: ubuntu-latest

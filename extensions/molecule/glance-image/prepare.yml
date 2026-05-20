@@ -1,0 +1,116 @@
+# Copyright (c) 2026 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Prepare host packages
+  hosts: all
+  become: true
+  tasks:
+    - name: Install Debian packages
+      ansible.builtin.apt:
+        name:
+          - dirmngr
+          - gnupg
+          - python3-pip
+          - qemu-utils
+        update_cache: true
+
+    - name: Install Python packages used by the test
+      ansible.builtin.pip:
+        name:
+          - "jmespath<1.1.0"
+          - kubernetes
+          - "openstacksdk>1"
+        extra_args: --break-system-packages
+
+- name: Install Kubernetes
+  ansible.builtin.import_playbook: vexxhost.atmosphere.kubernetes
+
+- name: Install CSI
+  ansible.builtin.import_playbook: vexxhost.atmosphere.csi
+
+- name: Deploy minimal OpenStack services for Glance
+  hosts: controllers
+  become: true
+  gather_facts: true
+  environment:
+    PIP_BREAK_SYSTEM_PACKAGES: "1"
+  pre_tasks:
+    - name: Expose OS family for Atmosphere roles
+      ansible.builtin.set_fact:
+        ansible_os_family: "{{ ansible_facts.os_family }}"
+  roles:
+    - role: vexxhost.atmosphere.cert_manager
+    - role: vexxhost.atmosphere.cluster_issuer
+    - role: vexxhost.atmosphere.ingress_nginx
+    - role: vexxhost.atmosphere.rabbitmq_cluster_operator
+    - role: vexxhost.atmosphere.percona_xtradb_cluster_operator
+    - role: vexxhost.atmosphere.percona_xtradb_cluster
+    - role: vexxhost.atmosphere.memcached
+    - role: vexxhost.atmosphere.keycloak
+    - role: vexxhost.atmosphere.keystone
+    - role: vexxhost.atmosphere.openstacksdk
+    - role: vexxhost.atmosphere.glance
+
+- name: Prepare local image source
+  hosts: controllers
+  become: true
+  tasks:
+    - name: Create image source directory
+      ansible.builtin.file:
+        path: /var/lib/glance-image-source
+        state: directory
+        mode: "0755"
+
+    - name: Create raw test image
+      ansible.builtin.command:
+        cmd: qemu-img create -f raw /var/lib/glance-image-source/test.img 1M
+        creates: /var/lib/glance-image-source/test.img
+
+    - name: Write initial image ETag
+      ansible.builtin.copy:
+        content: "glance-image-v1\n"
+        dest: /var/lib/glance-image-source/etag
+        mode: "0644"
+
+    - name: Copy ETag-aware image server
+      ansible.builtin.copy:
+        src: files/etag_server.py
+        dest: /usr/local/bin/glance-image-etag-server
+        mode: "0755"
+
+    - name: Check if image source is already listening
+      ansible.builtin.uri:
+        url: http://127.0.0.1:18080/test.img
+        method: HEAD
+        status_code: [200]
+      register: _image_source_existing
+      failed_when: false
+      changed_when: false
+
+    - name: Start ETag-aware image server
+      ansible.builtin.command:
+        argv:
+          - /usr/local/bin/glance-image-etag-server
+          - --directory
+          - /var/lib/glance-image-source
+          - --etag-file
+          - /var/lib/glance-image-source/etag
+          - --host
+          - 127.0.0.1
+          - --port
+          - "18080"
+      async: 7200
+      poll: 0
+      register: _image_source_server
+      when: _image_source_existing.status | default(0) != 200
+      changed_when: false
+
+    - name: Wait for image source to answer HEAD requests
+      ansible.builtin.uri:
+        url: http://127.0.0.1:18080/test.img
+        method: HEAD
+        status_code: [200]
+      register: _image_source_head
+      until: _image_source_head is not failed
+      retries: 30
+      delay: 2
