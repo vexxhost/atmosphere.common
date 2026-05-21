@@ -11,7 +11,6 @@
           - dirmngr
           - gnupg
           - python3-pip
-          - qemu-utils
         update_cache: true
 
     - name: Install Python packages used by the test
@@ -63,7 +62,7 @@
 
     - name: Create raw test image
       ansible.builtin.command:
-        cmd: qemu-img create -f raw /var/lib/glance-image-source/test.img 1M
+        cmd: truncate -s 1M /var/lib/glance-image-source/test.img
         creates: /var/lib/glance-image-source/test.img
 
     - name: Write initial image ETag

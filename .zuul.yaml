@@ -44,6 +44,7 @@
       - ^extensions/molecule/glance-image/.*
       - ^playbooks/glance_image.yaml$
       - ^roles/glance_image/.*
+      - ^roles/qemu_utils/.*
     required-projects:
       - ansible-collections/ansible.netcommon
       - ansible-collections/ansible.posix
