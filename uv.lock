@@ -64,7 +64,7 @@ dev = [
 requires-dist = [
     { name = "ansible-core", specifier = ">=2.18.4,<2.19.0" },
     { name = "docker-image-py", specifier = ">=0.1.13" },
-    { name = "jmespath", specifier = ">=1.0.1,<1.1.0" },
+    { name = "jmespath", specifier = ">=1.0.1" },
     { name = "kubernetes", specifier = ">=33.1.0" },
     { name = "pydantic", specifier = ">=2" },
 ]
