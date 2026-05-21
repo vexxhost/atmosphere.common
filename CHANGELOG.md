@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.0](https://github.com/vexxhost/atmosphere.common/compare/v0.6.0...v0.7.0) (2026-05-21)
+
+
+### Features
+
+* **glance_image:** migrate role into common ([#111](https://github.com/vexxhost/atmosphere.common/issues/111)) ([d68f973](https://github.com/vexxhost/atmosphere.common/commit/d68f9732717a807b5cb58b4acfeeb3f2334ce3b2))
+* **glance:** install qemu utilities via role dependency ([#115](https://github.com/vexxhost/atmosphere.common/issues/115)) ([2e8b73d](https://github.com/vexxhost/atmosphere.common/commit/2e8b73d56a7c484ebb340e3557a3048246c91307))
+
 ## [0.6.0](https://github.com/vexxhost/atmosphere.common/compare/v0.5.0...v0.6.0) (2026-02-17)
 
 
