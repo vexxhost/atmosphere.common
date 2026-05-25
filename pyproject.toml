@@ -4,7 +4,7 @@ version = "0.7.0"
 dependencies = [
     "ansible-core>=2.18.4,<2.19.0",
     "docker-image-py>=0.1.13",
-    "jmespath>=1.0.1,<1.1.0",
+    "jmespath>=1.0.1",
     "kubernetes>=33.1.0",
     "pydantic>=2",
 ]
