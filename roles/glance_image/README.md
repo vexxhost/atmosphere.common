@@ -41,3 +41,11 @@ are replaced with `atmosphere:image:obsolete`.
 
 Images uploaded by earlier versions of Atmosphere lack these properties and are
 treated as outdated on the next run, which causes a one-time re-upload.
+
+## Access Policy
+
+Set `glance_image_owner` and, when needed, `glance_image_owner_domain` to keep
+an image in a service project rather than the project used by the deployment
+credential. Set `glance_image_is_public` explicitly to manage visibility. The
+role reconciles these values even when the source URL and ETag are unchanged,
+so an upgrade repairs existing images without downloading them again.

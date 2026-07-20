@@ -41,6 +41,40 @@
           - _idempotent_image.images | length == 1
           - _idempotent_image.images[0].id == _initial_image.images[0].id
 
+    - name: Read the service project
+      openstack.cloud.project_info:
+        cloud: atmosphere
+        name: service
+        domain: service
+      register: _service_project
+
+    - name: Reconcile unchanged image access policy
+      ansible.builtin.include_role:
+        name: atmosphere.common.glance_image
+      vars:
+        glance_image_name: molecule-glance-image
+        glance_image_url: http://127.0.0.1:18080/test.img
+        glance_image_container_format: bare
+        glance_image_disk_format: raw
+        glance_image_owner: service
+        glance_image_owner_domain: service
+        glance_image_is_public: false
+
+    - name: Read image after access policy reconciliation
+      openstack.cloud.image_info:
+        cloud: atmosphere
+        image: molecule-glance-image
+      register: _reconciled_image
+
+    - name: Assert access policy changes without re-upload
+      ansible.builtin.assert:
+        that:
+          - _service_project.projects | length == 1
+          - _reconciled_image.images | length == 1
+          - _reconciled_image.images[0].id == _initial_image.images[0].id
+          - _reconciled_image.images[0].owner_id == _service_project.projects[0].id
+          - _reconciled_image.images[0].visibility == 'private'
+
     - name: Change source ETag
       become: true
       ansible.builtin.copy:
