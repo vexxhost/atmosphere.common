@@ -59,6 +59,8 @@
         glance_image_owner: service
         glance_image_owner_domain: service
         glance_image_is_public: false
+        glance_image_properties:
+          molecule_glance_contract: v1
 
     - name: Read image after access policy reconciliation
       openstack.cloud.image_info:
@@ -74,6 +76,9 @@
           - _reconciled_image.images[0].id == _initial_image.images[0].id
           - _reconciled_image.images[0].owner_id == _service_project.projects[0].id
           - _reconciled_image.images[0].visibility == 'private'
+          - >-
+            _reconciled_image.images[0].properties.molecule_glance_contract
+            == 'v1'
 
     - name: Change source ETag
       become: true

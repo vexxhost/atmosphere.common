@@ -208,7 +208,7 @@
       Expected exactly one project matching {{ glance_image_owner }} for
       Glance image ownership reconciliation.
 
-- name: Reconcile image ownership and visibility
+- name: Reconcile image access policy
   run_once: true
   when: >-
     glance_image_owner is defined
@@ -238,5 +238,31 @@
       }}
   retries: "{{ glance_image_retries }}"
   delay: 5
-  register: _glance_image_access_result
-  until: _glance_image_access_result is not failed
+  register: _glance_image_reconcile_result
+  until: _glance_image_reconcile_result is not failed
+
+- name: Reconcile image properties
+  run_once: true
+  when:
+    - glance_image_properties | default({}) | length > 0
+    - >-
+      (
+        glance_image_properties
+        | dict2items
+        | difference(_glance_image_existing_props | dict2items)
+        | length
+      ) > 0
+  openstack.cloud.image:
+    cloud: "{{ glance_image_cloud }}"
+    id: "{{ _glance_image_managed_id }}"
+    name: "{{ glance_image_name }}"
+    is_public: >-
+      {{
+        glance_image_is_public
+        | default(_glance_image_existing.visibility == 'public')
+      }}
+    properties: "{{ glance_image_properties }}"
+  retries: "{{ glance_image_retries }}"
+  delay: 5
+  register: _glance_image_properties_result
+  until: _glance_image_properties_result is not failed
