@@ -6,17 +6,18 @@
   ansible.builtin.assert:
     that:
       - >-
-        (glance_image_url is defined)
-        != (glance_image_oci_reference is defined)
+        (glance_image_url | length > 0)
+        != (glance_image_oci_reference | length > 0)
       - >-
-        glance_image_oci_reference is not defined
-        or glance_image_oci_reference is match('^[^@]+@sha256:[0-9a-f]{64}$')
+        glance_image_oci_reference | length == 0
+        or glance_image_oci_reference
+        is match('^[^@]+@sha256:[0-9a-f]{64}$')
       - >-
-        glance_image_oci_reference is not defined
-        or glance_image_oci_path | default('') is match('^/[^/].*')
+        glance_image_oci_reference | length == 0
+        or glance_image_oci_path is match('^/[^/].*')
       - >-
-        glance_image_oci_reference is not defined
-        or glance_image_oci_sha512 | default('') is match('^[0-9a-f]{128}$')
+        glance_image_oci_reference | length == 0
+        or glance_image_oci_sha512 is match('^[0-9a-f]{128}$')
     fail_msg: >-
       Define exactly one image source: glance_image_url, or a digest-pinned
       glance_image_oci_reference with an absolute artifact path and SHA512.
@@ -27,20 +28,20 @@
     _glance_image_source_url: >-
       {{
         glance_image_url
-        if glance_image_url is defined
+        if glance_image_url | length > 0
         else 'oci://' ~ glance_image_oci_reference ~ '#' ~ glance_image_oci_path
       }}
     # Reset per include_role loop item so a previous source ETag cannot leak.
     _glance_image_source_etag: ""
 
 - name: Capture OCI source checksum
-  when: glance_image_oci_reference is defined
+  when: glance_image_oci_reference | length > 0
   run_once: true
   ansible.builtin.set_fact:
     _glance_image_source_etag: "{{ glance_image_oci_sha512 }}"
 
 - name: Fetch source image metadata from URL
-  when: glance_image_url is defined
+  when: glance_image_url | length > 0
   run_once: true
   ansible.builtin.uri:
     url: "{{ glance_image_url }}"
@@ -59,7 +60,7 @@
 - name: Capture source ETag when available
   run_once: true
   when:
-    - glance_image_url is defined
+    - glance_image_url | length > 0
     - _glance_image_source_head.etag is defined
   ansible.builtin.set_fact:
     _glance_image_source_etag: "{{ _glance_image_source_head.etag | regex_replace('\"', '') }}"
@@ -100,7 +101,7 @@
       register: _glance_image_workdir
 
     - name: Download image from HTTP
-      when: glance_image_url is defined
+      when: glance_image_url | length > 0
       ansible.builtin.get_url:
         url: "{{ glance_image_url }}"
         dest: "{{ _glance_image_workdir.path }}/{{ glance_image_url | basename }}"
@@ -116,12 +117,12 @@
         no_proxy: "{{ glance_image_no_proxy }}"
 
     - name: Capture HTTP image path
-      when: glance_image_url is defined
+      when: glance_image_url | length > 0
       ansible.builtin.set_fact:
         _glance_image_download_dest: "{{ _glance_image_get_url.dest }}"
 
     - name: Extract image from OCI artifact
-      when: glance_image_oci_reference is defined
+      when: glance_image_oci_reference | length > 0
       ansible.builtin.include_tasks: source_oci.yml
 
     - name: Get image format

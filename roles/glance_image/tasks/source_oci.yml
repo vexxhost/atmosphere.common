@@ -20,7 +20,7 @@
         ]
         + (
           ['--authfile', glance_image_oci_authfile]
-          if glance_image_oci_authfile is defined
+          if glance_image_oci_authfile | length > 0
           else []
         )
         + [
@@ -30,7 +30,7 @@
       }}
 
 - name: Copy digest-pinned OCI artifact
-  no_log: "{{ glance_image_oci_authfile is defined }}"
+  no_log: "{{ glance_image_oci_authfile | length > 0 }}"
   ansible.builtin.command:
     argv: "{{ _glance_image_skopeo_argv }}"
   changed_when: true
