@@ -15,8 +15,7 @@
           'skopeo',
           'copy',
           '--override-os', 'linux',
-          '--override-arch', glance_image_oci_architecture,
-          '--dest-decompress'
+          '--override-arch', glance_image_oci_architecture
         ]
         + (
           ['--authfile', glance_image_oci_authfile]

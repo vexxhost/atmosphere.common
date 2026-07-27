@@ -21,9 +21,10 @@ glance_image_oci_sha512: <qcow2-sha512>
 # glance_image_oci_authfile: /run/secrets/registry-auth.json
 ```
 
-The role installs `skopeo`, selects the declared Linux architecture, extracts
-only the requested regular file, and verifies SHA512 before upload. An OCI
-reference without a manifest digest is rejected.
+The role installs `skopeo`, selects the declared Linux architecture, streams
+the requested regular file from compressed or uncompressed layers, and
+verifies SHA512 before upload. An OCI reference without a manifest digest is
+rejected.
 
 ## Change Detection
 
