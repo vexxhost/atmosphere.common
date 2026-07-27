@@ -1,13 +1,36 @@
 # `glance_image`
 
 This role uploads an image into OpenStack Glance and keeps it in sync with the
-upstream source URL.
+declared source.
+
+## Sources
+
+HTTP remains the default:
+
+```yaml
+glance_image_url: https://images.example/image.qcow2
+```
+
+An image can instead be extracted from a public or authenticated OCI image.
+The manifest and payload must both be immutable:
+
+```yaml
+glance_image_oci_reference: registry.example/image@sha256:<manifest-digest>
+glance_image_oci_path: /images/image.qcow2
+glance_image_oci_sha512: <qcow2-sha512>
+# glance_image_oci_authfile: /run/secrets/registry-auth.json
+```
+
+The role installs `skopeo`, selects the declared Linux architecture, extracts
+only the requested regular file, and verifies SHA512 before upload. An OCI
+reference without a manifest digest is rejected.
 
 ## Change Detection
 
-On every run, the role sends an HTTP `HEAD` request to `glance_image_url` to
-check for changes. The download and upload steps are skipped when no change is
-detected.
+For an HTTP source, the role sends a `HEAD` request to `glance_image_url` to
+check for changes. For OCI, the digest-pinned reference, artifact path, and
+required SHA512 form the source identity. Download and upload are skipped when
+that identity is already recorded on the Glance image.
 
 If the server returns an `ETag` header, the role captures it and compares it
 against the `atmosphere:image:etag` property stored on any existing image with

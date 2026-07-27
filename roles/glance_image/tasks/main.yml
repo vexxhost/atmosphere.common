@@ -1,7 +1,46 @@
 # Copyright (c) 2026 VEXXHOST, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+- name: Validate image source contract
+  run_once: true
+  ansible.builtin.assert:
+    that:
+      - >-
+        (glance_image_url is defined)
+        != (glance_image_oci_reference is defined)
+      - >-
+        glance_image_oci_reference is not defined
+        or glance_image_oci_reference is match('^[^@]+@sha256:[0-9a-f]{64}$')
+      - >-
+        glance_image_oci_reference is not defined
+        or glance_image_oci_path | default('') is match('^/[^/].*')
+      - >-
+        glance_image_oci_reference is not defined
+        or glance_image_oci_sha512 | default('') is match('^[0-9a-f]{128}$')
+    fail_msg: >-
+      Define exactly one image source: glance_image_url, or a digest-pinned
+      glance_image_oci_reference with an absolute artifact path and SHA512.
+
+- name: Capture immutable source identity
+  run_once: true
+  ansible.builtin.set_fact:
+    _glance_image_source_url: >-
+      {{
+        glance_image_url
+        if glance_image_url is defined
+        else 'oci://' ~ glance_image_oci_reference ~ '#' ~ glance_image_oci_path
+      }}
+    # Reset per include_role loop item so a previous source ETag cannot leak.
+    _glance_image_source_etag: ""
+
+- name: Capture OCI source checksum
+  when: glance_image_oci_reference is defined
+  run_once: true
+  ansible.builtin.set_fact:
+    _glance_image_source_etag: "{{ glance_image_oci_sha512 }}"
+
 - name: Fetch source image metadata from URL
+  when: glance_image_url is defined
   run_once: true
   ansible.builtin.uri:
     url: "{{ glance_image_url }}"
@@ -19,7 +58,9 @@
 
 - name: Capture source ETag when available
   run_once: true
-  when: _glance_image_source_head.etag is defined
+  when:
+    - glance_image_url is defined
+    - _glance_image_source_head.etag is defined
   ansible.builtin.set_fact:
     _glance_image_source_etag: "{{ _glance_image_source_head.etag | regex_replace('\"', '') }}"
 
@@ -44,8 +85,8 @@
   ansible.builtin.set_fact:
     _glance_image_needs_upload: "{{
       (_glance_image_info.images | length == 0)
-      or ((_glance_image_existing_props['atmosphere:image:url'] | default('')) != glance_image_url)
-      or (_glance_image_source_etag is defined
+      or ((_glance_image_existing_props['atmosphere:image:url'] | default('')) != _glance_image_source_url)
+      or (_glance_image_source_etag | length > 0
           and (_glance_image_existing_props['atmosphere:image:etag'] | default('')) != _glance_image_source_etag) }}"
 
 - name: Download image and upload into Glance
@@ -58,7 +99,8 @@
         state: directory
       register: _glance_image_workdir
 
-    - name: Download image
+    - name: Download image from HTTP
+      when: glance_image_url is defined
       ansible.builtin.get_url:
         url: "{{ glance_image_url }}"
         dest: "{{ _glance_image_workdir.path }}/{{ glance_image_url | basename }}"
@@ -73,22 +115,40 @@
         https_proxy: "{{ glance_image_https_proxy }}"
         no_proxy: "{{ glance_image_no_proxy }}"
 
+    - name: Capture HTTP image path
+      when: glance_image_url is defined
+      ansible.builtin.set_fact:
+        _glance_image_download_dest: "{{ _glance_image_get_url.dest }}"
+
+    - name: Extract image from OCI artifact
+      when: glance_image_oci_reference is defined
+      ansible.builtin.include_tasks: source_oci.yml
+
     - name: Get image format
       changed_when: false
-      ansible.builtin.shell: |
-        set -o pipefail
-        qemu-img info {{ _glance_image_get_url.dest }} | grep -i "file format" | awk '{ print $3 }'
-      args:
-        executable: /bin/bash
+      ansible.builtin.command:
+        argv:
+          - qemu-img
+          - info
+          - --output=json
+          - "{{ _glance_image_download_dest }}"
       register: _glance_image_format
 
     - name: Convert file to target disk format
       when:
         - glance_image_disk_format not in ['aki', 'ari']
-        - glance_image_disk_format != _glance_image_format.stdout
+        - >-
+          glance_image_disk_format
+          != ((_glance_image_format.stdout | from_json).format)
       changed_when: true
       ansible.builtin.command:
-        qemu-img convert -O {{ glance_image_disk_format }} {{ _glance_image_get_url.dest }} {{ _glance_image_get_url.dest }}.converted
+        argv:
+          - qemu-img
+          - convert
+          - -O
+          - "{{ glance_image_disk_format }}"
+          - "{{ _glance_image_download_dest }}"
+          - "{{ _glance_image_download_dest }}.converted"
       register: glance_image_conversion
 
     - name: Wait until image service ready
@@ -118,7 +178,7 @@
       openstack.cloud.image:
         cloud: "{{ glance_image_cloud }}"
         name: "{{ _glance_image_pending_name }}"
-        filename: "{{ _glance_image_get_url.dest }}{% if glance_image_conversion is not skipped %}.converted{% endif %}"
+        filename: "{{ _glance_image_download_dest }}{% if glance_image_conversion is not skipped %}.converted{% endif %}"
         min_disk: "{{ glance_image_min_disk | default(omit) }}"
         min_ram: "{{ glance_image_min_ram | default(omit) }}"
         container_format: "{{ glance_image_container_format | default(omit) }}"
@@ -126,8 +186,8 @@
         properties: >-
           {{
             (glance_image_properties | default({}))
-            | combine({'atmosphere:image:url': glance_image_url})
-            | combine({'atmosphere:image:etag': _glance_image_source_etag} if _glance_image_source_etag is defined else {})
+            | combine({'atmosphere:image:url': _glance_image_source_url})
+            | combine({'atmosphere:image:etag': _glance_image_source_etag} if _glance_image_source_etag | length > 0 else {})
           }}
         kernel: "{{ glance_image_kernel | default(omit) }}"
         ramdisk: "{{ glance_image_ramdisk | default(omit) }}"
