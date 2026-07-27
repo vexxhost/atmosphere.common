@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-import io
 import json
 from pathlib import Path, PurePosixPath
 import shutil
@@ -39,12 +38,12 @@ def _normalized_target(raw_target: str) -> PurePosixPath:
     return normalized
 
 
-def _layer_hides_target(names: set[str], target: PurePosixPath) -> bool:
+def _layer_hides_target(name: str, target: PurePosixPath) -> bool:
     whiteout = target.parent / f".wh.{target.name}"
-    if str(whiteout) in names:
+    if str(whiteout) == name:
         return True
     for parent in (target.parent, *target.parents):
-        if str(parent / ".wh..wh..opq") in names:
+        if str(parent / ".wh..wh..opq") == name:
             return True
     return False
 
@@ -61,19 +60,23 @@ def extract(archive_path: Path, raw_target: str, output: Path) -> None:
         )
         layers = manifest.get("layers", [])
         for descriptor in reversed(layers):
-            layer_data = _member(archive, _blob_name(descriptor["digest"]))
-            with tarfile.open(fileobj=io.BytesIO(layer_data), mode="r:*") as layer:
-                members = {
-                    (
+            layer_member = archive.getmember(_blob_name(descriptor["digest"]))
+            layer_stream = archive.extractfile(layer_member)
+            if layer_stream is None:
+                raise ValueError("OCI layer has no content")
+            found = False
+            hidden = False
+            with layer_stream, tarfile.open(fileobj=layer_stream, mode="r|*") as layer:
+                for member in layer:
+                    name = (
                         member.name[2:]
                         if member.name.startswith("./")
                         else member.name
-                    ): member
-                    for member in layer.getmembers()
-                }
-                target_name = str(target)
-                if target_name in members:
-                    member = members[target_name]
+                    )
+                    if _layer_hides_target(name, target):
+                        hidden = True
+                    if name != str(target):
+                        continue
                     if not member.isfile():
                         raise ValueError(f"OCI artifact {raw_target} is not a file")
                     stream = layer.extractfile(member)
@@ -81,9 +84,11 @@ def extract(archive_path: Path, raw_target: str, output: Path) -> None:
                         raise ValueError(f"OCI artifact {raw_target} has no content")
                     with output.open("wb") as destination:
                         shutil.copyfileobj(stream, destination)
-                    return
-                if _layer_hides_target(set(members), target):
-                    break
+                    found = True
+            if found:
+                return
+            if hidden:
+                break
     raise FileNotFoundError(f"OCI artifact does not contain {raw_target}")
 
 
