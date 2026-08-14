@@ -3,6 +3,8 @@
 
 - name: Prepare
   hosts: "{{ target | default('all') }}"
+  vars:
+    molecule_kubernetes_python_package: kubernetes==33.1.0
   tasks:
     - name: Install PIP
       ansible.builtin.package:
@@ -11,4 +13,4 @@
 
     - name: Install Kubernetes python package
       ansible.builtin.pip:
-        name: kubernetes
+        name: "{{ molecule_kubernetes_python_package }}"
