@@ -84,7 +84,7 @@ jobs:
         run: |
           sudo cp -r /home/runner/.kube /root/.kube
           sudo helm plugin install https://github.com/databus23/helm-diff
-      - uses: vexxhost/molecule-action@2ffd7cd0207a1f7c1e576aa5a4b2387f4da3143a # main
+      - uses: vexxhost/molecule-action@57775bba0d539dd51a9e0849560bd03114284558 # main
         env:
           KUBECONFIG: /root/.kube/config
         with:
