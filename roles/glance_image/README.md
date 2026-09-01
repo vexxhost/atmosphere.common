@@ -41,3 +41,16 @@ are replaced with `atmosphere:image:obsolete`.
 
 Images uploaded by earlier versions of Atmosphere lack these properties and are
 treated as outdated on the next run, which causes a one-time re-upload.
+
+## Managed Properties And Access Policy
+
+Set `glance_image_properties` to reconcile the requested custom properties even
+when the source URL and ETag are unchanged. The role preserves properties that
+are not present in the requested mapping; removing a key from inventory does
+not delete it from an existing image.
+
+Set `glance_image_owner` and, when needed, `glance_image_owner_domain` to keep
+an image in a service project rather than the project used by the deployment
+credential. Set `glance_image_is_public` explicitly to manage visibility. The
+role reconciles these values even when the source URL and ETag are unchanged,
+so an upgrade repairs existing images without downloading them again.
