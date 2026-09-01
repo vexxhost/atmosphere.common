@@ -1,0 +1,77 @@
+# Copyright (c) 2026 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Install OCI transport
+  become: true
+  ansible.builtin.package:
+    name: skopeo
+    state: present
+
+- name: Build OCI copy command
+  ansible.builtin.set_fact:
+    _glance_image_skopeo_argv: >-
+      {{
+        [
+          'skopeo',
+          'copy',
+          '--override-os', 'linux',
+          '--override-arch', glance_image_oci_architecture,
+          '--dest-compress-format', 'gzip',
+          '--dest-force-compress-format',
+          '--retry-times', '3'
+        ]
+        + (
+          ['--authfile', glance_image_oci_authfile]
+          if glance_image_oci_authfile | length > 0
+          else []
+        )
+        + [
+          'docker://' ~ glance_image_oci_reference,
+          'oci-archive:' ~ _glance_image_workdir.path ~ '/source.oci'
+        ]
+      }}
+
+- name: Copy digest-pinned OCI artifact
+  no_log: "{{ glance_image_oci_authfile | length > 0 }}"
+  ansible.builtin.command:
+    argv: "{{ _glance_image_skopeo_argv }}"
+  changed_when: true
+  environment:
+    http_proxy: "{{ glance_image_http_proxy }}"
+    https_proxy: "{{ glance_image_https_proxy }}"
+    no_proxy: "{{ glance_image_no_proxy }}"
+
+- name: Install OCI artifact extractor
+  ansible.builtin.copy:
+    src: extract_oci_file.py
+    dest: "{{ _glance_image_workdir.path }}/extract_oci_file.py"
+    mode: "0600"
+
+- name: Extract requested image from OCI artifact
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ _glance_image_workdir.path }}/extract_oci_file.py"
+      - "{{ _glance_image_workdir.path }}/source.oci"
+      - "{{ glance_image_oci_path }}"
+      - "{{ _glance_image_workdir.path }}/source-image"
+  changed_when: true
+
+- name: Verify extracted image SHA512
+  ansible.builtin.stat:
+    path: "{{ _glance_image_workdir.path }}/source-image"
+    checksum_algorithm: sha512
+    get_checksum: true
+  register: _glance_image_oci_stat
+
+- name: Require the reviewed OCI artifact payload
+  ansible.builtin.assert:
+    that:
+      - _glance_image_oci_stat.stat.checksum == glance_image_oci_sha512
+    fail_msg: >-
+      The image extracted from the digest-pinned OCI artifact does not match
+      glance_image_oci_sha512.
+
+- name: Capture OCI image path
+  ansible.builtin.set_fact:
+    _glance_image_download_dest: "{{ _glance_image_workdir.path }}/source-image"

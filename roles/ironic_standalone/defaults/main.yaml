@@ -7,6 +7,9 @@ ironic_standalone_namespace: baremetal-operator-system
 # Name of the Ironic Standalone instance
 ironic_standalone_name: ironic
 
+# Disable the IPA downloader init container
+ironic_standalone_deploy_ramdisk_disable_downloader: false
+
 # Interface for Ironic Standalone
 ironic_standalone_interface: "{{ ansible_default_ipv4.interface }}"
 
