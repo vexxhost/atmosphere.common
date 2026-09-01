@@ -38,11 +38,26 @@ def _normalized_target(raw_target: str) -> PurePosixPath:
     return normalized
 
 
-def _layer_hides_target(name: str, target: PurePosixPath) -> bool:
-    whiteout = target.parent / f".wh.{target.name}"
-    if str(whiteout) == name:
+def _layer_hides_target(member: tarfile.TarInfo, target: PurePosixPath) -> bool:
+    name = (
+        member.name[2:]
+        if member.name.startswith("./")
+        else member.name
+    )
+
+    # An explicit whiteout can remove the target itself or any ancestor
+    # directory, which also removes all of that directory's descendants.
+    for index, part in enumerate(target.parts):
+        parent = PurePosixPath(*target.parts[:index])
+        if str(parent / f".wh.{part}") == name:
+            return True
+
+    # Replacing an ancestor directory with another file type also hides all
+    # descendants inherited from lower layers.
+    if PurePosixPath(name) in target.parents and not member.isdir():
         return True
-    for parent in (target.parent, *target.parents):
+
+    for parent in target.parents:
         if str(parent / ".wh..wh..opq") == name:
             return True
     return False
@@ -73,7 +88,7 @@ def extract(archive_path: Path, raw_target: str, output: Path) -> None:
                         if member.name.startswith("./")
                         else member.name
                     )
-                    if _layer_hides_target(name, target):
+                    if _layer_hides_target(member, target):
                         hidden = True
                     if name != str(target):
                         continue

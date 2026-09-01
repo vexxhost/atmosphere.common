@@ -21,10 +21,10 @@ glance_image_oci_sha512: <qcow2-sha512>
 # glance_image_oci_authfile: /run/secrets/registry-auth.json
 ```
 
-The role installs `skopeo`, selects the declared Linux architecture, streams
-the requested regular file from compressed or uncompressed layers, and
-verifies SHA512 before upload. An OCI reference without a manifest digest is
-rejected.
+The role installs `skopeo`, selects the declared Linux architecture, converts
+layers to gzip during the copy, streams the requested regular file from gzip
+or uncompressed layers, and verifies SHA512 before upload. An OCI reference
+without a manifest digest is rejected.
 
 ## Change Detection
 
@@ -38,7 +38,8 @@ against the `atmosphere:image:etag` property stored on any existing image with
 the same name. A re-upload is triggered when:
 
 - no image with that name exists yet, or
-- the `atmosphere:image:url` property differs from `glance_image_url`, or
+- the `atmosphere:image:url` property differs from the selected source
+  identity, or
 - an `ETag` is available and it differs from the stored
   `atmosphere:image:etag`.
 
@@ -59,9 +60,10 @@ are replaced with `atmosphere:image:obsolete`.
 
 ## Properties Stamped On Uploaded Images
 
-- `atmosphere:image:url` - the exact URL used to download the image.
-- `atmosphere:image:etag` - the `ETag` returned by that URL at upload time.
-  This is only present when the source URL exposes an `ETag`.
+- `atmosphere:image:url` - the HTTP URL or immutable
+  `oci://<reference>#<path>` source identity.
+- `atmosphere:image:etag` - the HTTP `ETag`, when available, or the required
+  OCI payload SHA512.
 
 Images uploaded by earlier versions of Atmosphere lack these properties and are
 treated as outdated on the next run, which causes a one-time re-upload.

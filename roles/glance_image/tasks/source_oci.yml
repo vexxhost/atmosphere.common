@@ -15,7 +15,10 @@
           'skopeo',
           'copy',
           '--override-os', 'linux',
-          '--override-arch', glance_image_oci_architecture
+          '--override-arch', glance_image_oci_architecture,
+          '--dest-compress-format', 'gzip',
+          '--dest-force-compress-format',
+          '--retry-times', '3'
         ]
         + (
           ['--authfile', glance_image_oci_authfile]
@@ -33,6 +36,10 @@
   ansible.builtin.command:
     argv: "{{ _glance_image_skopeo_argv }}"
   changed_when: true
+  environment:
+    http_proxy: "{{ glance_image_http_proxy }}"
+    https_proxy: "{{ glance_image_https_proxy }}"
+    no_proxy: "{{ glance_image_no_proxy }}"
 
 - name: Install OCI artifact extractor
   ansible.builtin.copy:
