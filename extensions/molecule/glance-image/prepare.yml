@@ -4,6 +4,8 @@
 - name: Prepare host packages
   hosts: all
   become: true
+  vars:
+    molecule_kubernetes_python_package: kubernetes==33.1.0
   tasks:
     - name: Install Debian packages
       ansible.builtin.apt:
@@ -17,7 +19,7 @@
       ansible.builtin.pip:
         name:
           - "jmespath<1.1.0"
-          - kubernetes
+          - "{{ molecule_kubernetes_python_package }}"
           - "openstacksdk>1"
         extra_args: --break-system-packages
 
