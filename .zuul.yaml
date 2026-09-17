@@ -33,6 +33,14 @@
 - job:
     name: atmosphere-common-molecule-secretgen-controller
     parent: atmosphere-common-molecule
+    required-projects:
+      - ansible-collections/ansible.posix
+      - ansible-collections/community.crypto
+      - ansible-collections/community.general
+      - ansible-collections/kubernetes.core
+      - openstack/ansible-collections-openstack
+      - vexxhost/ansible-collection-containers
+      - vexxhost/ansible-collection-kubernetes
     vars:
       molecule_scenario: secretgen-controller
 
