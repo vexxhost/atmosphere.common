@@ -4,4 +4,5 @@
 - name: Deploy secretgen-controller
   kubernetes.core.k8s:
     state: present
-    template: release.yml.tpl
+    definition: >-
+      {{ lookup('ansible.builtin.template', 'release.yml.tpl') | from_yaml_all | list }}
