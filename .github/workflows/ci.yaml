@@ -108,6 +108,7 @@ jobs:
             --extra-vars target=localhost \
             --extra-vars kubeconfig_path=$HOME/.kube/config \
             --extra-vars ironic_standalone_ip_address=172.18.0.2 \
+            --extra-vars ironic_standalone_deploy_ramdisk_disable_downloader=true \
             --extra-vars ironic_standalone_dhcp_cidr=172.18.0.0/24 \
             --extra-vars ironic_standalone_dhcp_range_start=172.18.0.10 \
             --extra-vars ironic_standalone_dhcp_range_end=172.18.0.20 \
@@ -131,7 +132,12 @@ jobs:
             --namespace baremetal-operator-system \
             --for=condition=available \
             --timeout=5m \
-            deployment.apps/baremetal-operator-controller-manager \
+            deployment.apps/baremetal-operator-controller-manager
+      - run: |
+          kubectl wait \
+            --namespace baremetal-operator-system \
+            --for=condition=available \
+            --timeout=10m \
             deployment.apps/ironic-service
       - run: |
           kubectl wait \
@@ -139,6 +145,14 @@ jobs:
             --for=condition=available \
             --timeout=5m \
             deployment.apps/ironic-standalone-operator-controller-manager
+      - name: Dump Metal3 diagnostics
+        if: failure()
+        run: |
+          kubectl get all --namespace baremetal-operator-system --output=wide || true
+          kubectl get events --namespace baremetal-operator-system --sort-by=.lastTimestamp || true
+          kubectl describe deployment.apps/ironic-service --namespace baremetal-operator-system || true
+          kubectl describe pods --namespace baremetal-operator-system || true
+          kubectl logs deployment.apps/ironic-service --namespace baremetal-operator-system --all-containers --tail=200 || true
 
   dellhw_exporter:
     runs-on: ubuntu-latest
