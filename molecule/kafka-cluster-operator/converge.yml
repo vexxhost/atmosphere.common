@@ -1,0 +1,5 @@
+# Copyright (c) 2025 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Install Kafka cluster Operator
+  ansible.builtin.import_playbook: atmosphere.common.kafka_cluster_operator
