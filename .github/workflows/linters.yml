@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: step-security/setup-uv@ccf0a26ce9117d9e99292b0ce953ea5d9ffe778e # v7.3.0
       - run: uv run ansible-galaxy collection install ${{ github.workspace }}
-      - uses: ansible/ansible-lint@50373efb440dd3b524956c075af715cd00eaf20b # v25.8.2
+      - uses: ansible/ansible-lint@a2bc8b8b13a80802215856c56823d85007d3baf5 # v25.12.2
 
   pre-commit:
     runs-on: ubuntu-latest
