@@ -131,6 +131,8 @@
           }}
         kernel: "{{ glance_image_kernel | default(omit) }}"
         ramdisk: "{{ glance_image_ramdisk | default(omit) }}"
+        owner: "{{ glance_image_owner | default(omit) }}"
+        owner_domain: "{{ glance_image_owner_domain | default(omit) }}"
         is_public: "{{ glance_image_is_public | default(omit) }}"
         tags: "{{ glance_image_tags | default(omit) }}"
         wait: true
@@ -176,3 +178,91 @@
         path: "{{ _glance_image_workdir.path }}"
         state: absent
       when: _glance_image_workdir.path is defined
+
+- name: Select the current managed image
+  run_once: true
+  ansible.builtin.set_fact:
+    _glance_image_managed_id: >-
+      {{
+        _glance_image_upload_result.image.id
+        if _glance_image_needs_upload
+        else _glance_image_existing.id
+      }}
+
+- name: Resolve the requested image owner project
+  run_once: true
+  when: glance_image_owner is defined
+  openstack.cloud.project_info:
+    cloud: "{{ glance_image_cloud }}"
+    name: "{{ glance_image_owner }}"
+    domain: "{{ glance_image_owner_domain | default(omit) }}"
+  register: _glance_image_owner_project
+
+- name: Validate the requested image owner project
+  run_once: true
+  when: glance_image_owner is defined
+  ansible.builtin.assert:
+    that:
+      - _glance_image_owner_project.projects | length == 1
+    fail_msg: >-
+      Expected exactly one project matching {{ glance_image_owner }} for
+      Glance image ownership reconciliation.
+
+- name: Reconcile image access policy
+  run_once: true
+  when: >-
+    glance_image_owner is defined
+    or glance_image_is_public is defined
+  vars:
+    _glance_image_access_attributes: >-
+      {{
+        {'id': _glance_image_managed_id}
+        | combine(
+            {'owner': _glance_image_owner_project.projects[0].id}
+            if glance_image_owner is defined else {}
+          )
+        | combine(
+            {'visibility': ('public' if glance_image_is_public | bool else 'private')}
+            if glance_image_is_public is defined else {}
+          )
+      }}
+  openstack.cloud.resource:
+    cloud: "{{ glance_image_cloud }}"
+    service: image
+    type: image
+    attributes: "{{ _glance_image_access_attributes }}"
+    updateable_attributes: >-
+      {{
+        (['owner'] if glance_image_owner is defined else [])
+        + (['visibility'] if glance_image_is_public is defined else [])
+      }}
+  retries: "{{ glance_image_retries }}"
+  delay: 5
+  register: _glance_image_reconcile_result
+  until: _glance_image_reconcile_result is not failed
+
+- name: Reconcile image properties
+  run_once: true
+  when:
+    - glance_image_properties | default({}) | length > 0
+    - >-
+      (
+        glance_image_properties
+        | dict2items
+        | difference(_glance_image_existing_props | dict2items)
+        | length
+      ) > 0
+  openstack.cloud.image:
+    cloud: "{{ glance_image_cloud }}"
+    id: "{{ _glance_image_managed_id }}"
+    name: "{{ glance_image_name }}"
+    is_public: >-
+      {{
+        glance_image_is_public
+        | default(_glance_image_existing.visibility == 'public')
+      }}
+    properties: "{{ glance_image_properties }}"
+  retries: "{{ glance_image_retries }}"
+  delay: 5
+  register: _glance_image_properties_result
+  until: _glance_image_properties_result is not failed
