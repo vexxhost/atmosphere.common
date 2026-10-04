@@ -1,0 +1,46 @@
+# Copyright (c) 2024 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+- name: Install openstacksdk using PIP
+  when: >-
+    (ansible_facts['distribution'] == 'Ubuntu'
+    and ansible_facts['distribution_major_version'] is version('22', '<='))
+    or (ansible_facts['distribution'] == 'Debian'
+    and ansible_facts['distribution_major_version'] is version('12', '<='))
+    or ansible_facts['distribution'] in ['AlmaLinux', 'RedHat', 'Rocky']
+  ansible.builtin.pip:
+    name: >-
+      {{ 'openstacksdk==' + openstacksdk_version
+         if openstacksdk_version is defined
+         else 'openstacksdk>1' }}
+  register: _openstacksdk_pip_install
+  retries: 3
+  delay: 5
+  until: _openstacksdk_pip_install is not failed
+
+- name: Install openstacksdk using package manager
+  when: >-
+    (ansible_facts['distribution'] == 'Ubuntu'
+    and ansible_facts['distribution_major_version'] is version('22', '>'))
+    or (ansible_facts['distribution'] == 'Debian'
+    and ansible_facts['distribution_major_version'] is version('12', '>'))
+  ansible.builtin.package:
+    name: python3-openstacksdk
+
+- name: Create openstack config directory
+  become: true
+  ansible.builtin.file:
+    path: /etc/openstack
+    state: directory
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Generate cloud config file
+  become: true
+  ansible.builtin.template:
+    src: clouds.yaml.j2
+    dest: /etc/openstack/clouds.yaml
+    owner: root
+    group: root
+    mode: "0600"

@@ -1,0 +1,7 @@
+# Copyright (c) 2024 VEXXHOST, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+# Set this to pin the exact ``openstacksdk`` version installed by pip-based
+# role installs. When unset, pip-based installs use ``openstacksdk>1`` to avoid
+# old SDK versions that are incompatible with supported Python releases.
+# openstacksdk_version:
