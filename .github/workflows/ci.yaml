@@ -162,7 +162,8 @@ jobs:
           kubectl get ironic --namespace baremetal-operator-system --output=yaml || true
           kubectl get all --namespace ironic-standalone-operator-system --output=wide || true
           kubectl get events --namespace ironic-standalone-operator-system --sort-by=.lastTimestamp || true
-          kubectl logs deployment.apps/ironic-standalone-operator-controller-manager --namespace ironic-standalone-operator-system --all-containers --tail=200 || true
+          kubectl logs deployment.apps/ironic-standalone-operator-controller-manager \
+            --namespace ironic-standalone-operator-system --all-containers --tail=200 || true
 
   dellhw_exporter:
     runs-on: ubuntu-latest
