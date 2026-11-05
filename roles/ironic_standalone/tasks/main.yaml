@@ -48,5 +48,5 @@
               serveDNS: true
   register: ironic_standalone_apply
   until: ironic_standalone_apply is not failed
-  retries: 5
-  delay: 5
+  retries: 12
+  delay: 10

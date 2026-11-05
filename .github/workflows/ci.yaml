@@ -102,6 +102,9 @@ jobs:
       - uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
       - uses: step-security/setup-uv@ccf0a26ce9117d9e99292b0ce953ea5d9ffe778e # v7.3.0
       - run: uv run ansible-galaxy collection install ${{ github.workspace }}
+      # NOTE: This is a smoke test for the controllers and deployments only, so
+      # the IPA downloader init container (enabled by default in production) is
+      # disabled here to avoid depending on IPA artifact downloads.
       - run: |
           uv run ansible-playbook \
             --connection=local \
@@ -153,6 +156,11 @@ jobs:
           kubectl describe deployment.apps/ironic-service --namespace baremetal-operator-system || true
           kubectl describe pods --namespace baremetal-operator-system || true
           kubectl logs deployment.apps/ironic-service --namespace baremetal-operator-system --all-containers --tail=200 || true
+          kubectl get kustomizations --all-namespaces || true
+          kubectl get ironic --namespace baremetal-operator-system --output=yaml || true
+          kubectl get all --namespace ironic-standalone-operator-system --output=wide || true
+          kubectl get events --namespace ironic-standalone-operator-system --sort-by=.lastTimestamp || true
+          kubectl logs deployment.apps/ironic-standalone-operator-controller-manager --namespace ironic-standalone-operator-system --all-containers --tail=200 || true
 
   dellhw_exporter:
     runs-on: ubuntu-latest
