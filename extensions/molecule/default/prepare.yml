@@ -4,6 +4,10 @@
 - name: Prepare
   hosts: "{{ target | default('all') }}"
   vars:
+    # NOTE: kubernetes>=36 requires pyyaml>=6.0.3, which makes pip try to
+    # replace the Debian-provided PyYAML on Ubuntu Noble and fail with
+    # "RECORD file not found". Keep this in line with uv.lock and below 36
+    # until the system PyYAML is new enough or this moves to a virtualenv.
     molecule_kubernetes_python_package: kubernetes==33.1.0
   tasks:
     - name: Install PIP

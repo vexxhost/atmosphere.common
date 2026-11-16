@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/vexxhost/atmosphere.common/compare/v0.7.0...v0.7.1) (2026-09-17)
+
+
+### Bug Fixes
+
+* **secretgen:** render release manifest before applying ([#123](https://github.com/vexxhost/atmosphere.common/issues/123)) ([01262bc](https://github.com/vexxhost/atmosphere.common/commit/01262bcb8a278069570ff371cc97da172b4065f0))
+
 ## [0.7.0](https://github.com/vexxhost/atmosphere.common/compare/v0.6.0...v0.7.0) (2026-05-21)
 
 
